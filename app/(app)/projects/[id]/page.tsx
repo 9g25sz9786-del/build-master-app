@@ -12,6 +12,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (profile?.role === "designer") redirect(`/media/${id}`);
+
   const { data: project, error } = await supabase
     .from("projects")
     .select("id, name, project_type, data, updated_at")

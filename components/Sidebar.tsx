@@ -1,16 +1,18 @@
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutGrid, GitCompare, LogOut } from "lucide-react";
+import { LayoutGrid, GitCompare, LogOut, Image as ImageIcon, Building2, Users } from "lucide-react";
 import { signOut } from "@/app/actions";
 
 export default function Sidebar({
   active,
   userEmail,
   scoreBadge,
+  role = "owner",
 }: {
-  active: "projects" | "compare" | "workspace";
+  active: "projects" | "compare" | "workspace" | "media" | "company-profile" | "team";
   userEmail?: string | null;
   scoreBadge?: { value: string; label: string } | null;
+  role?: "owner" | "designer";
 }) {
   return (
     <aside className="sidebar">
@@ -22,12 +24,29 @@ export default function Sidebar({
         </div>
       </div>
       <nav className="sidebar-nav">
-        <Link href="/projects" className={"nav-btn" + (active === "projects" || active === "workspace" ? " active" : "")}>
-          <LayoutGrid size={16} strokeWidth={2} /> Projects
-        </Link>
-        <Link href="/compare" className={"nav-btn" + (active === "compare" ? " active" : "")}>
-          <GitCompare size={16} strokeWidth={2} /> Compare
-        </Link>
+        {role === "designer" ? (
+          <Link href="/media" className={"nav-btn" + (active === "media" ? " active" : "")}>
+            <ImageIcon size={16} strokeWidth={2} /> Project Media
+          </Link>
+        ) : (
+          <>
+            <Link href="/projects" className={"nav-btn" + (active === "projects" || active === "workspace" ? " active" : "")}>
+              <LayoutGrid size={16} strokeWidth={2} /> Projects
+            </Link>
+            <Link href="/compare" className={"nav-btn" + (active === "compare" ? " active" : "")}>
+              <GitCompare size={16} strokeWidth={2} /> Compare
+            </Link>
+            <Link href="/media" className={"nav-btn" + (active === "media" ? " active" : "")}>
+              <ImageIcon size={16} strokeWidth={2} /> Project Media
+            </Link>
+            <Link href="/company-profile" className={"nav-btn" + (active === "company-profile" ? " active" : "")}>
+              <Building2 size={16} strokeWidth={2} /> Company Profile
+            </Link>
+            <Link href="/team" className={"nav-btn" + (active === "team" ? " active" : "")}>
+              <Users size={16} strokeWidth={2} /> Team
+            </Link>
+          </>
+        )}
       </nav>
       <div className="sidebar-footer">
         {scoreBadge && (

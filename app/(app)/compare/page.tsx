@@ -13,6 +13,9 @@ export default async function ComparePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (profile?.role === "designer") redirect("/media");
+
   const { data: projects, error } = await supabase
     .from("projects")
     .select("id, name, project_type, data")

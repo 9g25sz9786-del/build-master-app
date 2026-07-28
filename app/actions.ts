@@ -54,3 +54,103 @@ export async function signOut() {
   await supabase.auth.signOut();
   redirect("/login");
 }
+
+/* ─────────────────────────────── Company Profile ─────────────────────────────── */
+
+export async function saveCompanyProfile(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const highlights = String(formData.get("portfolio_highlights") || "")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const payload = {
+    id: user!.id,
+    company_name: String(formData.get("company_name") || "Maharaja Engineers & Contractors"),
+    tagline: String(formData.get("tagline") || "") || null,
+    about: String(formData.get("about") || "") || null,
+    established_year: formData.get("established_year") ? Number(formData.get("established_year")) : null,
+    completed_projects_count: formData.get("completed_projects_count") ? Number(formData.get("completed_projects_count")) : null,
+    address: String(formData.get("address") || "") || null,
+    phone: String(formData.get("phone") || "") || null,
+    email: String(formData.get("email") || "") || null,
+    website: String(formData.get("website") || "") || null,
+    portfolio_highlights: highlights,
+  };
+
+  const { error } = await supabase.from("company_profiles").upsert(payload);
+  if (error) throw new Error(error.message);
+  revalidatePath("/company-profile");
+  revalidatePath("/projects");
+}
+
+/* ─────────────────────────────── Team / Designer invites ─────────────────────────────── */
+
+export async function inviteDesigner(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  if (!email) throw new Error("Email is required");
+
+  const { error } = await supabase.from("team_members").insert({
+    owner_id: user!.id,
+    invited_email: email,
+    role: "designer",
+    status: "pending",
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/team");
+}
+
+export async function removeTeamMember(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("team_members").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/team");
+}
+
+/* ─────────────────────────────── Project media ─────────────────────────────── */
+
+export async function addProjectMedia(
+  projectId: string,
+  category: string,
+  title: string,
+  caption: string,
+  storagePath: string
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase.from("project_media").insert({
+    project_id: projectId,
+    uploaded_by: user!.id,
+    category,
+    title,
+    caption: caption || null,
+    storage_path: storagePath,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath(`/media/${projectId}`);
+  revalidatePath(`/projects/${projectId}`);
+}
+
+export async function deleteProjectMedia(id: string, projectId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("project_media").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/media/${projectId}`);
+  revalidatePath(`/projects/${projectId}`);
+}
+

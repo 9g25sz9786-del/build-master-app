@@ -12,6 +12,7 @@ import {
   BarChart3, Layers, AlertTriangle, CheckCircle2, ShieldAlert,
   ArrowRight, ArrowLeft, GitCompare, LayoutDashboard, ChevronRight,
   Building, Hotel, Landmark, SlidersHorizontal, Gauge, ScrollText, Trash2, LogOut, ArrowLeftCircle,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   computeAll, buildRecommendation, fmtINR, fmtNum, fmtYears, clamp, ProjectState, Metrics,
@@ -205,7 +206,7 @@ function ScoreGauge({ score, label }: { score: number; label: string }) {
    DASHBOARD
    ========================================================================================= */
 
-function Dashboard({ state, m, go }: { state: ProjectState; m: Metrics; go: (s: string, st?: number) => void }) {
+function Dashboard({ state, m, go, projectId }: { state: ProjectState; m: Metrics; go: (s: string, st?: number) => void; projectId: string }) {
   return (
     <div className="view">
       <div className="blueprint-hero">
@@ -257,6 +258,7 @@ function Dashboard({ state, m, go }: { state: ProjectState; m: Metrics; go: (s: 
           <button className="quicknav-btn" onClick={() => go("results")}><BarChart3 size={15} /> Results & Score</button>
           <button className="quicknav-btn" onClick={() => go("report")}><ScrollText size={15} /> AI Report</button>
           <button className="quicknav-btn" onClick={() => go("charts")}><BarChart3 size={15} /> Charts</button>
+          <a href={`/projects/${projectId}/full-report`} target="_blank" rel="noreferrer" className="quicknav-btn"><ScrollText size={15} /> Full Printable Report</a>
         </div>
       </div>
     </div>
@@ -516,10 +518,13 @@ function Results({ m, adj, setAdj, mAdj }: { m: Metrics; adj: { occDelta: number
    REPORT
    ========================================================================================= */
 
-function Report({ m, rec, state }: { m: Metrics; rec: ReturnType<typeof buildRecommendation>; state: ProjectState }) {
+function Report({ m, rec, state, projectId }: { m: Metrics; rec: ReturnType<typeof buildRecommendation>; state: ProjectState; projectId: string }) {
   return (
     <div className="view">
       <StepHeader n={8} title="Investment Score & AI Recommendation" subtitle="Deterministic, weighted evaluation across 8 factors." />
+      <a href={`/projects/${projectId}/full-report`} target="_blank" rel="noreferrer" className="btn-primary" style={{ width: "fit-content" }}>
+        <ScrollText size={15} /> Open Full Printable Report (Company Profile + Feasibility + Renders + Conclusion)
+      </a>
       <div className="card"><ScoreGauge score={m.overallScore} label={m.scoreLabel} /></div>
       <div className="card">
         <div className="card-head">Verdict</div>
@@ -712,6 +717,9 @@ export default function Workspace({ project, userEmail }: { project: { id: strin
             </button>
           ))}
           <Link href="/compare" className="nav-btn"><GitCompare size={16} strokeWidth={2} /> Compare</Link>
+          <Link href="/media" className="nav-btn"><ImageIcon size={16} strokeWidth={2} /> Project Media</Link>
+          <Link href={`/media/${project.id}`} className="nav-btn" style={{ paddingLeft: 32, fontSize: 12 }}>This project's media →</Link>
+          <Link href={`/projects/${project.id}/full-report`} className="nav-btn" target="_blank"><ScrollText size={16} strokeWidth={2} /> Full Printable Report</Link>
         </nav>
         <div className="sidebar-footer">
           <div className="footer-score"><span>Score</span><span className="mono footer-score-val">{fmtNum(m.overallScore)}</span></div>
@@ -732,10 +740,10 @@ export default function Workspace({ project, userEmail }: { project: { id: strin
           <button className="btn-danger" onClick={handleDelete}><Trash2 size={14} /> Delete Project</button>
         </div>
 
-        {section === "dashboard" && <Dashboard state={state} m={m} go={go} />}
+        {section === "dashboard" && <Dashboard state={state} m={m} go={go} projectId={project.id} />}
         {section === "build" && <Wizard state={state} dispatch={dispatch} m={m} step={step} setStep={setStep} />}
         {section === "results" && <Results m={m} adj={adj} setAdj={setAdj} mAdj={mAdj} />}
-        {section === "report" && <Report m={m} rec={rec} state={state} />}
+        {section === "report" && <Report m={m} rec={rec} state={state} projectId={project.id} />}
         {section === "charts" && <Charts m={m} scenarios={scenarios} />}
       </main>
     </div>
