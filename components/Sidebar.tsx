@@ -15,7 +15,7 @@ export default function Sidebar({
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <Image src="/logo.png" alt="Build Master" width={30} height={30} className="brand-logo" />
+        <Image src="/logo.png" alt="Build Master" width={44} height={44} className="brand-logo" />
         <div>
           <div className="brand-name">Build Master</div>
           <div className="brand-sub">Project Feasibility App</div>
