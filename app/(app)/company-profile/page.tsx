@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
+import CompanySections from "@/components/CompanySections";
 import { saveCompanyProfile } from "@/app/actions";
 import { Building2 } from "lucide-react";
-import { CompanyProfile } from "@/lib/types";
+import { CompanyProfile, CompanyProfileSection } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,12 @@ export default async function CompanyProfilePage() {
     .eq("id", user.id)
     .single();
 
+  const { data: sections } = await supabase
+    .from("company_profile_sections")
+    .select("*")
+    .eq("owner_id", user.id)
+    .order("sort_order", { ascending: true });
+
   const c = (company as CompanyProfile) || null;
 
   return (
@@ -34,11 +41,12 @@ export default async function CompanyProfilePage() {
             <div className="step-stamp"><Building2 size={14} /></div>
             <div>
               <h2 className="step-title">Company Profile</h2>
-              <p className="step-subtitle">Appears as the introduction section of every project's printable feasibility report.</p>
+              <p className="step-subtitle">The Basics appear on every report's cover and contact block. Add as many Content Sections as you need below — each becomes its own heading, paragraph and photo gallery in the report's introduction.</p>
             </div>
           </div>
 
           <form action={saveCompanyProfile} className="card" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div className="card-head">The Basics</div>
             <div className="field-grid">
               <label className="field">
                 <span className="field-label">Company Name</span>
@@ -73,19 +81,17 @@ export default async function CompanyProfilePage() {
                 <input name="address" className="field-input" style={{ paddingLeft: 12 }} defaultValue={c?.address || ""} />
               </label>
             </div>
-
-            <label className="field">
-              <span className="field-label">About the Company</span>
-              <textarea name="about" rows={5} className="field-input" style={{ paddingLeft: 12, paddingTop: 10, fontFamily: "Inter, sans-serif" }} defaultValue={c?.about || ""} placeholder="A short profile describing the company's history, expertise and approach — this becomes the introduction of the printable report." />
-            </label>
-
-            <label className="field">
-              <span className="field-label">Portfolio Highlights (one per line)</span>
-              <textarea name="portfolio_highlights" rows={5} className="field-input" style={{ paddingLeft: 12, paddingTop: 10, fontFamily: "Inter, sans-serif" }} defaultValue={(c?.portfolio_highlights || []).join("\n")} placeholder={"60+ residential and commercial projects delivered\nISO 9001:2015 certified\nIn-house architecture, structural and MEP teams"} />
-            </label>
-
-            <button className="btn-primary" type="submit" style={{ width: "fit-content" }}>Save Company Profile</button>
+            <button className="btn-primary" type="submit" style={{ width: "fit-content" }}>Save The Basics</button>
           </form>
+
+          <div className="step-header" style={{ marginTop: 8 }}>
+            <div className="step-stamp">+</div>
+            <div>
+              <h2 className="step-title" style={{ fontSize: 17 }}>Content Sections</h2>
+              <p className="step-subtitle">e.g. "Building More than Structures", "Where it Began" — paste long text and add photos for each.</p>
+            </div>
+          </div>
+          <CompanySections initialSections={(sections as CompanyProfileSection[]) || []} />
         </div>
       </main>
     </div>

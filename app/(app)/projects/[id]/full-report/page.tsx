@@ -3,7 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftCircle } from "lucide-react";
 import { computeAll, buildRecommendation, fmtINR, fmtNum, fmtYears, ProjectState } from "@/lib/engine";
-import { CompanyProfile, ProjectMedia, MEDIA_CATEGORY_LABEL, MediaCategory } from "@/lib/types";
+import { CompanyProfile, ProjectMedia, MEDIA_CATEGORY_LABEL, MediaCategory, CompanyProfileSection } from "@/lib/types";
 import PrintButton from "@/components/PrintButton";
 import ReportCharts from "@/components/ReportCharts";
 
@@ -47,6 +47,15 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
     .select("*")
     .eq("id", project.user_id)
     .single();
+
+  const { data: companySectionsRaw } = await supabase
+    .from("company_profile_sections")
+    .select("*")
+    .eq("owner_id", project.user_id)
+    .order("sort_order", { ascending: true });
+  const companySections = (companySectionsRaw as CompanyProfileSection[]) || [];
+  const companyPublicUrl = (path: string) =>
+    supabase.storage.from("company-media").getPublicUrl(path).data.publicUrl;
 
   const { data: mediaRows } = await supabase
     .from("project_media")
@@ -97,16 +106,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
         {/* 1. Introduction / Company Profile */}
         <section className="report-section">
           <h2 className="report-section-title"><span className="report-section-num">01</span> Introduction — Company Profile</h2>
-          <p className="report-prose">
-            {c?.about ||
-              "Company profile has not been filled in yet. Add one from the Company Profile page so every report opens with a proper introduction."}
-          </p>
-          {(c?.portfolio_highlights?.length || 0) > 0 && (
-            <ul className="report-highlights">
-              {c!.portfolio_highlights.map((h, i) => <li key={i}>{h}</li>)}
-            </ul>
-          )}
-          <div className="report-contact-grid">
+          <div className="report-contact-grid" style={{ marginBottom: 20 }}>
             {c?.established_year && <div><b>Established:</b> {c.established_year}</div>}
             {c?.completed_projects_count && <div><b>Completed Projects:</b> {c.completed_projects_count}+</div>}
             {c?.phone && <div><b>Phone:</b> {c.phone}</div>}
@@ -114,6 +114,28 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
             {c?.website && <div><b>Website:</b> {c.website}</div>}
             {c?.address && <div><b>Address:</b> {c.address}</div>}
           </div>
+
+          {companySections.length === 0 ? (
+            <p className="report-prose">
+              No company profile content yet. Add sections (heading + text + photos) from the Company Profile page —
+              they'll appear here automatically, in order.
+            </p>
+          ) : (
+            companySections.map((s) => (
+              <div key={s.id} style={{ marginBottom: 32 }}>
+                <h3 style={{ fontFamily: "Poppins,sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 10 }}>{s.title}</h3>
+                <p className="report-prose">{s.body}</p>
+                {s.photos && s.photos.length > 0 && (
+                  <div className="report-media-grid" style={{ marginTop: 14 }}>
+                    {s.photos.map((p) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img key={p.storage_path} src={companyPublicUrl(p.storage_path)} alt="" style={{ width: "100%", height: 220, objectFit: "cover", borderRadius: 10, border: "1px solid var(--line)" }} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </section>
 
         {/* 2. Project Feasibility */}

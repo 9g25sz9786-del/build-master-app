@@ -154,3 +154,71 @@ export async function deleteProjectMedia(id: string, projectId: string) {
   revalidatePath(`/projects/${projectId}`);
 }
 
+/* ─────────────────────────────── Company Profile Sections ─────────────────────────────── */
+
+export async function createCompanySection() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data, error } = await supabase
+    .from("company_profile_sections")
+    .insert({ owner_id: user!.id, title: "New Section", body: "", sort_order: Date.now() })
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  revalidatePath("/company-profile");
+  return data;
+}
+
+export async function updateCompanySection(id: string, title: string, body: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("company_profile_sections").update({ title, body }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/company-profile");
+}
+
+export async function deleteCompanySection(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("company_profile_sections").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/company-profile");
+}
+
+export async function addSectionPhoto(sectionId: string, storagePath: string, caption: string) {
+  const supabase = await createClient();
+  const { data: existing, error: readErr } = await supabase
+    .from("company_profile_sections")
+    .select("photos")
+    .eq("id", sectionId)
+    .single();
+  if (readErr) throw new Error(readErr.message);
+
+  const photos = Array.isArray(existing?.photos) ? existing!.photos : [];
+  photos.push({ storage_path: storagePath, caption });
+
+  const { error } = await supabase.from("company_profile_sections").update({ photos }).eq("id", sectionId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/company-profile");
+}
+
+export async function removeSectionPhoto(sectionId: string, storagePath: string) {
+  const supabase = await createClient();
+  const { data: existing, error: readErr } = await supabase
+    .from("company_profile_sections")
+    .select("photos")
+    .eq("id", sectionId)
+    .single();
+  if (readErr) throw new Error(readErr.message);
+
+  const photos = (Array.isArray(existing?.photos) ? existing!.photos : []).filter(
+    (p: any) => p.storage_path !== storagePath
+  );
+
+  const { error } = await supabase.from("company_profile_sections").update({ photos }).eq("id", sectionId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/company-profile");
+}
+

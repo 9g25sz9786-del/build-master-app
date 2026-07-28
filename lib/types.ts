@@ -30,6 +30,21 @@ export interface ProjectMedia {
   created_at: string;
 }
 
+export interface SectionPhoto {
+  storage_path: string;
+  caption: string;
+}
+
+export interface CompanyProfileSection {
+  id: string;
+  owner_id: string;
+  title: string;
+  body: string;
+  photos: SectionPhoto[];
+  sort_order: number;
+  created_at: string;
+}
+
 export interface TeamMember {
   id: string;
   owner_id: string;

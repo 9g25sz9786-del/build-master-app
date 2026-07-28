@@ -233,3 +233,12 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
   .report-section { break-inside: avoid-page; page-break-inside: avoid; }
   body { background:#FFFFFF; }
 }
+
+/* Company profile content sections */
+.section-card { display:flex; flex-direction:column; gap:0; }
+.section-card-head { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.section-drag-handle { color:var(--line); flex-shrink:0; }
+.section-title-input { flex:1; font-family:'Poppins',sans-serif; font-weight:600; font-size:15px; border:none; background:transparent; padding:6px 8px; border-radius:6px; color:var(--ink); }
+.section-title-input:focus { outline:1px solid var(--brass); background:#FFFFFF; }
+.section-body-input { width:100%; border:1px solid var(--line); border-radius:8px; padding:12px 14px; font-size:13.5px; line-height:1.7; font-family:'Inter',sans-serif; color:var(--ink); resize:vertical; }
+.section-body-input:focus { outline:none; border-color:var(--brass); }
