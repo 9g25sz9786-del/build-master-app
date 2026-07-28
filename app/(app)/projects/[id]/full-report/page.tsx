@@ -3,7 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftCircle } from "lucide-react";
 import { computeAll, buildRecommendation, fmtINR, fmtNum, fmtYears, ProjectState } from "@/lib/engine";
-import { CompanyProfile, ProjectMedia, MEDIA_CATEGORY_LABEL, MediaCategory, CompanyProfileSection } from "@/lib/types";
+import { CompanyProfile, ProjectMedia, CompanyProfileSection } from "@/lib/types";
 import PrintButton from "@/components/PrintButton";
 import ReportCharts from "@/components/ReportCharts";
 
@@ -16,13 +16,61 @@ function ScoreGaugeStatic({ score }: { score: number }) {
   const angle = -90 + pct * 180;
   const r = 70, cx = 90, cy = 90;
   const rad = (deg: number) => (deg * Math.PI) / 180;
-  const arcColor = score >= 7 ? "#2E8B6F" : score >= 5 ? "#B8863B" : "#B5482F";
+  const arcColor = score >= 7 ? "#2E8B6F" : score >= 5 ? "#C1272D" : "#C1272D";
   return (
     <svg viewBox="0 0 180 110" style={{ width: 200 }}>
-      <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="#ECE8DD" strokeWidth="12" strokeLinecap="round" />
+      <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="#ECECEC" strokeWidth="12" strokeLinecap="round" />
       <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r * Math.cos(rad(angle))} ${cy + r * Math.sin(rad(angle))}`} fill="none" stroke={arcColor} strokeWidth="12" strokeLinecap="round" />
-      <text x={cx} y={cy - 6} textAnchor="middle" fontSize="26" fontWeight="700" fontFamily="IBM Plex Mono, monospace" fill="#1A1712">{fmtNum(score)}</text>
-      <text x={cx} y={cy + 14} textAnchor="middle" fontSize="11" fill="#6B6355">out of 10</text>
+      <text x={cx} y={cy - 6} textAnchor="middle" fontSize="26" fontWeight="700" fontFamily="IBM Plex Mono, monospace" fill="#141414">{fmtNum(score)}</text>
+      <text x={cx} y={cy + 14} textAnchor="middle" fontSize="11" fill="#6E6E6E">out of 10</text>
+    </svg>
+  );
+}
+
+// Original line-art placeholder graphics — shown only until real photos are uploaded.
+function CoverPlaceholder() {
+  return (
+    <svg className="report-cover-placeholder" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <rect width="800" height="600" fill="#1c1c1c" />
+      <g stroke="#4a4a4a" strokeWidth="2" fill="none">
+        <line x1="120" y1="560" x2="120" y2="120" />
+        <line x1="120" y1="120" x2="60" y2="120" />
+        <line x1="90" y1="120" x2="90" y2="60" />
+        <line x1="60" y1="150" x2="180" y2="150" />
+        <line x1="60" y1="220" x2="180" y2="220" />
+        <line x1="60" y1="290" x2="180" y2="290" />
+      </g>
+      <g stroke="#3a3a3a" strokeWidth="1.5" fill="none">
+        <rect x="300" y="260" width="420" height="300" />
+        <line x1="300" y1="330" x2="720" y2="330" />
+        <line x1="300" y1="400" x2="720" y2="400" />
+        <line x1="300" y1="470" x2="720" y2="470" />
+        <line x1="380" y1="260" x2="380" y2="560" />
+        <line x1="460" y1="260" x2="460" y2="560" />
+        <line x1="540" y1="260" x2="540" y2="560" />
+        <line x1="620" y1="260" x2="620" y2="560" />
+      </g>
+    </svg>
+  );
+}
+function TopicPlaceholder() {
+  return (
+    <svg viewBox="0 0 800 360" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: 360, display: "block" }}>
+      <rect width="800" height="360" fill="#EDEDED" />
+      <g stroke="#B9B9B9" strokeWidth="2" fill="none">
+        <rect x="140" y="90" width="220" height="200" />
+        <line x1="140" y1="150" x2="360" y2="150" />
+        <line x1="140" y1="210" x2="360" y2="210" />
+        <line x1="140" y1="250" x2="360" y2="250" />
+        <line x1="200" y1="90" x2="200" y2="290" />
+        <line x1="260" y1="90" x2="260" y2="290" />
+        <line x1="320" y1="90" x2="320" y2="290" />
+      </g>
+      <g stroke="#C1272D" strokeWidth="2.5" fill="none">
+        <line x1="450" y1="290" x2="450" y2="80" />
+        <line x1="450" y1="80" x2="500" y2="60" />
+        <line x1="450" y1="100" x2="600" y2="100" />
+      </g>
     </svg>
   );
 }
@@ -78,6 +126,14 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
   const sitePhotos = media.filter((x) => x.category === "site_photo" || x.category === "other");
 
   const today = new Date().toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" });
+  const companyName = c?.company_name || "Maharaja Engineers & Contractors";
+
+  const TOC = [
+    { n: "01", label: "Company Profile" },
+    { n: "02", label: "Project Feasibility Analysis" },
+    ...(media.length > 0 ? [{ n: "03", label: "Renderings, Plans & Site Photos" }] : []),
+    { n: media.length > 0 ? "04" : "03", label: "Conclusion & Recommendation" },
+  ];
 
   return (
     <div className="report-page">
@@ -91,22 +147,46 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
         <div className="report-cover">
           {coverImage ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={publicUrl(coverImage.storage_path)} alt="" style={{ width: "100%", maxHeight: 340, objectFit: "cover" }} />
-          ) : null}
-          <div className="report-cover-company">{c?.company_name || "Maharaja Engineers & Contractors"}</div>
-          <h1 className="report-cover-title">{project.name}</h1>
-          <p className="report-cover-sub">Commercial Project Feasibility Report — {PROJECT_TYPE_LABEL[project.project_type] || project.project_type}</p>
-          <div className="report-cover-meta">
-            <span>Location: {state.project.location || "—"}</span>
-            <span>Prepared: {today}</span>
-            <span>Investment Score: {fmtNum(m.overallScore)}/10</span>
+            <img src={publicUrl(coverImage.storage_path)} alt="" className="report-cover-bg" />
+          ) : (
+            <CoverPlaceholder />
+          )}
+          <div className="report-cover-overlay" />
+          <div className="report-cover-logo-row">
+            {c?.logo_storage_path ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={companyPublicUrl(c.logo_storage_path)} alt={companyName} />
+            ) : null}
+            <span className="report-cover-logo-text">{companyName}</span>
+          </div>
+          <div className="report-cover-content">
+            <div className="report-cover-eyebrow"><span className="report-accent-dot" /> Commercial Project Feasibility Report</div>
+            <h1 className="report-cover-title">{project.name}<span className="accent">.</span></h1>
+            <p className="report-cover-sub">{PROJECT_TYPE_LABEL[project.project_type] || project.project_type} — {state.project.location || "—"}</p>
+            <div className="report-cover-meta">
+              <span>PREPARED {today.toUpperCase()}</span>
+              <span>SCORE {fmtNum(m.overallScore)}/10</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Contents */}
+        <div className="report-toc">
+          <div className="report-toc-title">Contents</div>
+          <div className="report-toc-list">
+            {TOC.map((t) => (
+              <div className="report-toc-item" key={t.n}>
+                <span className="report-toc-num">{t.n}</span>
+                <span className="report-toc-label">{t.label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* 1. Introduction / Company Profile */}
         <section className="report-section">
-          <h2 className="report-section-title"><span className="report-section-num">01</span> Introduction — Company Profile</h2>
-          <div className="report-contact-grid" style={{ marginBottom: 20 }}>
+          <h2 className="report-section-title"><span className="report-section-num">01</span> Company Profile</h2>
+          <div className="report-contact-grid" style={{ marginBottom: 26 }}>
             {c?.established_year && <div><b>Established:</b> {c.established_year}</div>}
             {c?.completed_projects_count && <div><b>Completed Projects:</b> {c.completed_projects_count}+</div>}
             {c?.phone && <div><b>Phone:</b> {c.phone}</div>}
@@ -118,21 +198,33 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           {companySections.length === 0 ? (
             <p className="report-prose">
               No company profile content yet. Add sections (heading + text + photos) from the Company Profile page —
-              they'll appear here automatically, in order.
+              they'll appear here automatically, in order, laid out exactly like this.
             </p>
           ) : (
             companySections.map((s) => (
-              <div key={s.id} style={{ marginBottom: 32 }}>
-                <h3 style={{ fontFamily: "Poppins,sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 10 }}>{s.title}</h3>
-                <p className="report-prose">{s.body}</p>
-                {s.photos && s.photos.length > 0 && (
-                  <div className="report-media-grid" style={{ marginTop: 14 }}>
-                    {s.photos.map((p) => (
+              <div key={s.id} className="report-topic">
+                <div className="report-topic-heading-row">
+                  <span className="report-accent-dot" />
+                  <h3 className="report-topic-title">{s.title}</h3>
+                </div>
+                <div className="report-topic-rule" />
+                <div className="report-topic-hero">
+                  {s.photos && s.photos.length > 0 ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={companyPublicUrl(s.photos[0].storage_path)} alt="" />
+                  ) : (
+                    <TopicPlaceholder />
+                  )}
+                </div>
+                {s.photos && s.photos.length > 1 && (
+                  <div className="report-topic-grid">
+                    {s.photos.slice(1).map((p) => (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img key={p.storage_path} src={companyPublicUrl(p.storage_path)} alt="" style={{ width: "100%", height: 220, objectFit: "cover", borderRadius: 10, border: "1px solid var(--line)" }} />
+                      <img key={p.storage_path} src={companyPublicUrl(p.storage_path)} alt="" />
                     ))}
                   </div>
                 )}
+                <p className="report-prose">{s.body}</p>
               </div>
             ))
           )}
@@ -241,7 +333,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
 
         {/* 4. Conclusion */}
         <section className="report-section">
-          <h2 className="report-section-title"><span className="report-section-num">04</span> Conclusion & Recommendation</h2>
+          <h2 className="report-section-title"><span className="report-section-num">{media.length > 0 ? "04" : "03"}</span> Conclusion & Recommendation</h2>
           <p className="report-prose" style={{ marginBottom: 18 }}>{rec.verdict}</p>
 
           <div className="report-cols" style={{ marginBottom: 16 }}>
@@ -264,9 +356,11 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           </div>
         </section>
 
-        <p style={{ textAlign: "center", fontSize: 11, color: "var(--slate)" }}>
-          Prepared by {c?.company_name || "Maharaja Engineers & Contractors"} using the Build Master Project Feasibility App — {today}
-        </p>
+        <div className="report-final-cta">
+          <span className="report-accent-dot" style={{ display: "block", margin: "0 auto 16px" }} />
+          <h3>{companyName}</h3>
+          <p>{c?.tagline || "Building trust, one project at a time."} — Report prepared {today}</p>
+        </div>
       </div>
     </div>
   );

@@ -197,7 +197,11 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .new-project-card { display:flex; align-items:center; justify-content:center; gap:8px; border:1.5px dashed var(--line); border-radius:14px; padding:18px; background:transparent; color:var(--slate); font-size:13px; cursor:pointer; min-height:96px; }
 .new-project-card:hover { border-color:var(--brass); color:var(--brass-deep); }
 
-/* Media manager */
+/* Company logo upload */
+.logo-upload { display:flex; gap:18px; align-items:center; margin-bottom:6px; }
+.logo-upload-preview { width:72px; height:72px; border-radius:10px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden; background:#FCFAF1; flex-shrink:0; }
+.logo-upload-preview img { width:100%; height:100%; object-fit:contain; }
+.logo-upload-placeholder { font-size:10px; color:var(--slate); text-align:center; }
 .media-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap:14px; }
 .media-tile { position:relative; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#FFFFFF; }
 .media-thumb { width:100%; height:130px; object-fit:cover; display:block; background:#F4F1E7; }
@@ -207,31 +211,72 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .media-delete { position:absolute; top:6px; right:6px; background:rgba(26,23,18,.65); border:none; color:#fff; width:24px; height:24px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 
 /* Full printable report */
-.report-page { background:#FFFFFF; min-height:100vh; }
+.report-page { background:#FFFFFF; min-height:100vh; --r-ink:#141414; --r-red:#C1272D; --r-line:#E4E4E4; --r-gray:#6E6E6E; }
 .report-topbar { display:flex; justify-content:space-between; align-items:center; padding:16px 28px; border-bottom:1px solid var(--line); position:sticky; top:0; background:#FFFFFF; z-index:5; }
-.report-doc { max-width:860px; margin:0 auto; padding:0 28px 80px; }
-.report-cover { text-align:center; padding:80px 20px 60px; border-bottom:3px solid var(--brass); margin-bottom:40px; }
-.report-cover img { border-radius:16px; margin-bottom:20px; }
-.report-cover-company { font-family:'Poppins',sans-serif; font-weight:700; font-size:15px; color:var(--brass-deep); letter-spacing:.04em; text-transform:uppercase; }
-.report-cover-title { font-family:'Poppins',sans-serif; font-weight:700; font-size:34px; margin:14px 0 8px; }
-.report-cover-sub { font-size:14px; color:var(--slate); }
-.report-cover-meta { margin-top:26px; font-size:12px; color:var(--slate); display:flex; justify-content:center; gap:22px; flex-wrap:wrap; }
-.report-section { margin-bottom:48px; }
-.report-section-title { font-family:'Poppins',sans-serif; font-weight:700; font-size:22px; border-bottom:2px solid var(--ink); padding-bottom:10px; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
-.report-section-num { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--brass-deep); border:1.5px solid var(--brass); border-radius:6px; padding:2px 8px; }
-.report-prose { font-size:14px; line-height:1.75; color:var(--ink); white-space:pre-line; }
+.report-doc { max-width:900px; margin:0 auto; padding:0 0 90px; }
+.report-doc-inset { padding:0 40px; }
+
+/* Cover: full-bleed photo, dark gradient, bold overlay type */
+.report-cover { position:relative; min-height:620px; display:flex; align-items:flex-end; overflow:hidden; background:var(--r-ink); margin-bottom:0; }
+.report-cover-bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.08) brightness(0.85); }
+.report-cover-placeholder { position:absolute; inset:0; width:100%; height:100%; }
+.report-cover-overlay { position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,20,20,0.05) 20%, rgba(20,20,20,0.92) 100%); }
+.report-cover-logo-row { position:absolute; top:30px; left:40px; z-index:3; display:flex; align-items:center; gap:10px; }
+.report-cover-logo-row img { height:42px; width:auto; border-radius:6px; background:#fff; padding:4px; object-fit:contain; }
+.report-cover-logo-text { color:#fff; font-family:'Poppins',sans-serif; font-weight:700; font-size:13px; letter-spacing:.05em; text-transform:uppercase; }
+.report-cover-content { position:relative; z-index:2; padding:50px 44px; color:#fff; width:100%; }
+.report-cover-eyebrow { display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#fff; margin-bottom:14px; }
+.report-accent-dot { display:inline-block; width:9px; height:9px; background:var(--r-red); flex-shrink:0; }
+.report-cover-title { font-family:'Poppins',sans-serif; font-weight:700; font-size:44px; line-height:1.1; margin:0 0 12px; max-width:620px; }
+.report-cover-title .accent { color:var(--r-red); }
+.report-cover-sub { font-size:15px; color:#E8E4D8; max-width:520px; }
+.report-cover-meta { margin-top:26px; font-size:11.5px; color:#C9C4B5; display:flex; gap:22px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; }
+
+/* Contents page */
+.report-toc { padding:50px 44px 20px; }
+.report-toc-title { font-family:'Poppins',sans-serif; font-weight:700; font-size:13px; letter-spacing:.15em; text-transform:uppercase; color:var(--r-gray); margin-bottom:24px; }
+.report-toc-list { display:flex; flex-direction:column; }
+.report-toc-item { display:flex; align-items:baseline; gap:16px; padding:16px 0; border-bottom:1px solid var(--r-line); }
+.report-toc-num { font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--r-red); font-weight:600; width:28px; flex-shrink:0; }
+.report-toc-label { font-family:'Poppins',sans-serif; font-weight:600; font-size:17px; color:var(--r-ink); }
+
+.report-section { margin-bottom:60px; padding:0 44px; }
+.report-section-title { font-family:'Poppins',sans-serif; font-weight:700; font-size:24px; margin-bottom:22px; display:flex; align-items:center; gap:12px; color:var(--r-ink); }
+.report-section-num { font-family:'IBM Plex Mono',monospace; font-size:12px; color:#fff; background:var(--r-red); border-radius:4px; padding:3px 9px; }
+.report-prose { font-size:14px; line-height:1.8; color:#2A2A2A; white-space:pre-line; }
 .report-highlights { margin:16px 0 0; padding-left:20px; font-size:13.5px; line-height:1.8; }
-.report-contact-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:10px 24px; margin-top:18px; font-size:13px; }
+.report-contact-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:10px 24px; margin-top:6px; font-size:13px; color:#333; }
+
+/* Company profile content sections (editorial magazine layout) */
+.report-topic { margin-bottom:46px; }
+.report-topic-heading-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.report-topic-title { font-family:'Poppins',sans-serif; font-weight:700; font-size:21px; color:var(--r-ink); }
+.report-topic-rule { width:40px; height:3px; background:var(--r-red); margin-bottom:16px; }
+.report-topic-hero { position:relative; margin-bottom:16px; border-radius:2px; overflow:hidden; }
+.report-topic-hero img, .report-topic-hero svg { width:100%; height:360px; object-fit:cover; display:block; filter:grayscale(1) contrast(1.05); }
+.report-topic-tag { position:absolute; left:0; bottom:0; background:var(--r-red); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; padding:6px 14px; }
+.report-topic-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin:14px 0 18px; }
+.report-topic-grid img { width:100%; height:130px; object-fit:cover; filter:grayscale(1) contrast(1.05); border-radius:2px; }
+
 .report-media-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:20px; margin-top:18px; }
-.report-media-card img { width:100%; height:220px; object-fit:cover; border-radius:10px; border:1px solid var(--line); }
-.report-media-caption { font-size:12px; color:var(--slate); margin-top:8px; }
+.report-media-card img { width:100%; height:220px; object-fit:cover; border-radius:2px; border:1px solid var(--r-line); filter:grayscale(1) contrast(1.05); }
+.report-media-caption { font-size:12px; color:var(--r-gray); margin-top:8px; }
 .report-media-title { font-size:13px; font-weight:600; margin-top:10px; }
+
+.report-final-cta { background:var(--r-ink); color:#fff; padding:60px 44px; text-align:center; margin-top:10px; }
+.report-final-cta h3 { font-family:'Poppins',sans-serif; font-size:22px; margin:0 0 10px; }
+.report-final-cta p { color:#C9C4B5; font-size:13px; }
+.report-final-cta .report-accent-dot { margin:0 auto 16px; }
 @media print {
   .no-print { display:none !important; }
   .report-topbar { display:none !important; }
-  .report-cover { padding-top:20px; }
+  .report-cover { break-inside: avoid-page; }
+  .report-topic, .report-toc, .report-final-cta { break-inside: avoid-page; page-break-inside: avoid; }
   .report-section { break-inside: avoid-page; page-break-inside: avoid; }
   body { background:#FFFFFF; }
+  .report-cover-bg, .report-cover-placeholder, .report-topic-hero img, .report-topic-hero svg, .report-media-card img, .report-topic-grid img {
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
 }
 
 /* Company profile content sections */

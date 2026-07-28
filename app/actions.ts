@@ -57,6 +57,20 @@ export async function signOut() {
 
 /* ─────────────────────────────── Company Profile ─────────────────────────────── */
 
+export async function saveCompanyLogo(storagePath: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase
+    .from("company_profiles")
+    .upsert({ id: user!.id, logo_storage_path: storagePath });
+  if (error) throw new Error(error.message);
+  revalidatePath("/company-profile");
+}
+
 export async function saveCompanyProfile(formData: FormData) {
   const supabase = await createClient();
   const {

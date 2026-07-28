@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import CompanySections from "@/components/CompanySections";
+import CompanyLogoUpload from "@/components/CompanyLogoUpload";
 import { saveCompanyProfile } from "@/app/actions";
 import { Building2 } from "lucide-react";
 import { CompanyProfile, CompanyProfileSection } from "@/lib/types";
@@ -47,6 +48,7 @@ export default async function CompanyProfilePage() {
 
           <form action={saveCompanyProfile} className="card" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="card-head">The Basics</div>
+            <CompanyLogoUpload ownerId={user.id} initialPath={c?.logo_storage_path || null} />
             <div className="field-grid">
               <label className="field">
                 <span className="field-label">Company Name</span>
