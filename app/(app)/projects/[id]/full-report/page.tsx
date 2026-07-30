@@ -236,11 +236,14 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
   const today = new Date().toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" });
   const companyName = c?.company_name || "Maharaja Engineers & Contractors";
 
+  const hasAuthorContent = !!(c?.author_name || c?.author_bio || c?.author_photo_storage_path);
+  const conclusionNum = media.length > 0 ? 4 : 3;
   const TOC = [
     { n: "01", label: "Project Introduction" },
     { n: "02", label: "Project Feasibility Analysis" },
     ...(media.length > 0 ? [{ n: "03", label: "Renderings, Plans & Site Photos" }] : []),
-    { n: media.length > 0 ? "04" : "03", label: "Conclusion & Recommendation" },
+    { n: String(conclusionNum).padStart(2, "0"), label: "Conclusion & Recommendation" },
+    ...(hasAuthorContent ? [{ n: String(conclusionNum + 1).padStart(2, "0"), label: "About the Author" }] : []),
   ];
 
   return (

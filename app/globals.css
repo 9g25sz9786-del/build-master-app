@@ -260,6 +260,7 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .report-topic-heading-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
 .report-topic-title { font-family:'Poppins',sans-serif; font-weight:700; font-size:21px; color:var(--r-ink); }
 .report-topic-rule { width:40px; height:3px; background:var(--r-red); margin-bottom:16px; }
+.report-topic .report-prose { text-align: justify; }
 .report-topic-hero { position:relative; margin-bottom:16px; border-radius:2px; overflow:hidden; }
 .report-topic-hero img, .report-topic-hero svg { width:100%; height:360px; object-fit:cover; display:block; filter:grayscale(1) contrast(1.05); }
 .report-topic-tag { position:absolute; left:0; bottom:0; background:var(--r-red); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; padding:6px 14px; }
@@ -307,7 +308,7 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .report-author-sheet-text { flex:1; display:flex; align-items:center; padding:60px 50px; }
 .report-author-sheet-text .report-author-bio { font-size:14.5px; }
 @media print {
-  @page { margin: 0; size: auto; }
+  @page { margin: 18mm 0; size: auto; }
   html, body { margin: 0 !important; padding: 0 !important; background: #FFFFFF; }
   .no-print { display:none !important; }
   .report-topbar { display:none !important; }
@@ -315,6 +316,22 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
   .report-topic, .report-toc, .report-final-cta, .report-colophon, .report-author, .report-author-sheet { break-inside: avoid-page; page-break-inside: avoid; }
   .report-section { break-inside: avoid-page; page-break-inside: avoid; }
   .report-doc { max-width: 100%; }
+
+  /* Only genuinely full-bleed sections cancel the page margin to reach true paper edges.
+     Regular content (Feasibility Analysis, Conclusion, etc.) keeps the @page margin above,
+     which is what gives every page — including ones a long section breaks onto — proper
+     top/bottom breathing room instead of text touching the paper edge. */
+  .report-cover, .report-author, .report-author-sheet, .report-final-cta, .report-colophon {
+    margin-top: -18mm;
+    margin-bottom: -18mm;
+    break-before: page;
+    page-break-before: always;
+  }
+  .report-cover { break-before: auto; page-break-before: auto; }
+  .report-cover, .report-author, .report-author-sheet, .report-final-cta, .report-colophon {
+    min-height: 100vh;
+  }
+
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
