@@ -102,14 +102,33 @@ function reducer(state: ProjectState, action: any): ProjectState {
    ATOMS
    ========================================================================================= */
 
-function NumField({ label, suffix, value, onChange }: { label: string; suffix?: string; value: number; onChange: (v: number) => void }) {
+function NumField({ label, suffix, value, onChange }: { label: string; suffix?: string; value: number | null; onChange: (v: number | null) => void }) {
+  const isNA = value === null || value === undefined;
   return (
     <label className="field">
-      <span className="field-label">{label}</span>
+      <div className="field-label-row">
+        <span className="field-label">{label}</span>
+        <select
+          className="na-select"
+          value={isNA ? "na" : "value"}
+          onChange={(e) => onChange(e.target.value === "na" ? null : 0)}
+        >
+          <option value="value">Value</option>
+          <option value="na">N/A</option>
+        </select>
+      </div>
       <div className="field-input-wrap">
-        {suffix === "₹" && <span className="field-prefix">₹</span>}
-        <input type="number" className="field-input" value={value ?? ""} onChange={(e) => onChange(e.target.value === "" ? 0 : parseFloat(e.target.value))} style={{ paddingLeft: suffix === "₹" ? 28 : 12 }} />
-        {suffix && suffix !== "₹" && <span className="field-suffix">{suffix}</span>}
+        {suffix === "₹" && !isNA && <span className="field-prefix">₹</span>}
+        <input
+          type="number"
+          className={"field-input" + (isNA ? " field-input-na" : "")}
+          value={isNA ? "" : value ?? ""}
+          disabled={isNA}
+          placeholder={isNA ? "N/A" : ""}
+          onChange={(e) => onChange(e.target.value === "" ? 0 : parseFloat(e.target.value))}
+          style={{ paddingLeft: suffix === "₹" && !isNA ? 28 : 12 }}
+        />
+        {suffix && suffix !== "₹" && !isNA && <span className="field-suffix">{suffix}</span>}
       </div>
     </label>
   );
