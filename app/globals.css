@@ -303,36 +303,49 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .report-author-name { font-family:'Poppins',sans-serif; font-weight:700; font-size:24px; margin-bottom:10px; }
 .report-author-bio { font-size:13.5px; line-height:1.85; color:#E8E4D8; white-space:pre-line; text-align:justify; }
 @media print {
-  @page { margin: 18mm 0; size: auto; }
+  @page { size: A4; margin: 18mm 0; }
+  /* The cover is page 1. Negative-margin "bleed" tricks are unreliable on a document's
+     very first page in most print engines (the top of page 1 is a hard boundary, so
+     pulling a box up past it with a negative margin clips it instead of bleeding it) —
+     that's what was cutting off the logo band. Giving page 1 its own zero margin via
+     @page :first avoids needing that trick there at all. */
+  @page :first { margin: 0; }
+
   html, body { margin: 0 !important; padding: 0 !important; background: #FFFFFF; }
   .no-print { display:none !important; }
   .report-topbar { display:none !important; }
-  .report-cover { break-inside: avoid-page; }
-  .report-toc, .report-final-cta, .report-colophon, .report-author { break-inside: avoid-page; page-break-inside: avoid; }
-  /* NOTE: intentionally NOT applied to .report-section / .report-topic — these are long,
-     multi-paragraph blocks that legitimately span several pages. Marking a block that's
-     taller than one page as "avoid break inside" makes the browser shove the whole thing
-     onto a fresh page when it doesn't fit the remaining space, which is exactly what was
-     leaving large blank gaps and forcing awkward splits. Instead we protect the small,
-     genuinely atomic pieces below so *those* never get cut in half. */
+
+  /* Each of the report's major sections (Project Introduction, Feasibility Analysis,
+     Renderings, Conclusion) always starts on its own fresh page — a deliberate,
+     predictable structure rather than letting a heading land wherever the previous
+     section happened to end. */
+  .report-section {
+    break-before: page;
+    page-break-before: always;
+  }
+  .report-toc, .report-final-cta, .report-colophon, .report-author {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+  /* NOTE: intentionally NOT applied to .report-topic — these are long, multi-paragraph
+     blocks that legitimately span several pages themselves. Instead we protect the
+     small, genuinely atomic pieces below so *those* never get cut in half. */
   .card, .stat-tile, .report-media-card, .report-toc-item, .report-score-row {
     break-inside: avoid-page;
     page-break-inside: avoid;
   }
   .report-doc { max-width: 100%; }
 
-  /* Only genuinely full-bleed sections cancel the page margin to reach true paper edges.
-     Regular content (Feasibility Analysis, Conclusion, etc.) keeps the @page margin above,
-     which is what gives every page — including ones a long section breaks onto — proper
-     top/bottom breathing room instead of text touching the paper edge. */
-  .report-cover, .report-author, .report-author-sheet, .report-final-cta, .report-colophon {
+  /* Full-bleed sections after page 1 cancel the page margin to reach true paper edges.
+     Regular content pages keep the @page margin, which is what gives every page —
+     including ones a long section breaks onto — proper top/bottom breathing room. */
+  .report-cover { min-height: 100vh; }
+
+  .report-author, .report-final-cta, .report-colophon {
     margin-top: -18mm;
     margin-bottom: -18mm;
     break-before: page;
     page-break-before: always;
-  }
-  .report-cover { break-before: auto; page-break-before: auto; }
-  .report-cover, .report-author, .report-author-sheet, .report-final-cta, .report-colophon {
     min-height: 100vh;
   }
 
