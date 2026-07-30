@@ -13,7 +13,7 @@ const PROJECT_TYPE_LABEL: Record<string, string> = { hostel: "Hostel", apartment
 
 function ScoreGaugeStatic({ score }: { score: number }) {
   const pct = Math.min(10, Math.max(0, score)) / 10;
-  const angle = -90 + pct * 180;
+  const angle = 180 + pct * 180;
   const r = 70, cx = 90, cy = 90;
   const rad = (deg: number) => (deg * Math.PI) / 180;
   const arcColor = score >= 7 ? "#2E8B6F" : score >= 5 ? "#C1272D" : "#C1272D";

@@ -194,7 +194,7 @@ const COLORS = ["#B8863B", "#3D6B8C", "#2E8B6F", "#B5482F", "#8A6DAA", "#5C7A99"
 
 function ScoreGauge({ score, label }: { score: number; label: string }) {
   const pct = clamp(score, 0, 10) / 10;
-  const angle = -90 + pct * 180;
+  const angle = 180 + pct * 180;
   const r = 80, cx = 100, cy = 100;
   const rad = (deg: number) => (deg * Math.PI) / 180;
   const needleX = cx + r * 0.72 * Math.cos(rad(angle));
@@ -206,7 +206,7 @@ function ScoreGauge({ score, label }: { score: number; label: string }) {
         <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="#E4DECC" strokeWidth="14" strokeLinecap="round" />
         <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r * Math.cos(rad(angle))} ${cy + r * Math.sin(rad(angle))}`} fill="none" stroke={arcColor} strokeWidth="14" strokeLinecap="round" />
         {[0, 2, 4, 6, 8, 10].map((t) => {
-          const a = -90 + (t / 10) * 180;
+          const a = 180 + (t / 10) * 180;
           const x1 = cx + (r + 12) * Math.cos(rad(a)), y1 = cy + (r + 12) * Math.sin(rad(a));
           return <text key={t} x={x1} y={y1} textAnchor="middle" fontSize="9" fill="#7C7460" fontFamily="IBM Plex Mono, monospace">{t}</text>;
         })}
