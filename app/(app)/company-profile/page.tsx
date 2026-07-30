@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import CompanyLogoUpload from "@/components/CompanyLogoUpload";
+import AuthorPhotoUpload from "@/components/AuthorPhotoUpload";
 import { saveCompanyProfile } from "@/app/actions";
 import { Building2 } from "lucide-react";
 import { CompanyProfile } from "@/lib/types";
@@ -76,7 +77,21 @@ export default async function CompanyProfilePage() {
                 <input name="address" className="field-input" style={{ paddingLeft: 12 }} defaultValue={c?.address || ""} />
               </label>
             </div>
-            <button className="btn-primary" type="submit" style={{ width: "fit-content" }}>Save The Basics</button>
+
+            <div className="card-head" style={{ marginTop: 8 }}>Author</div>
+            <AuthorPhotoUpload ownerId={user.id} initialPath={c?.author_photo_storage_path || null} />
+            <div className="field-grid">
+              <label className="field">
+                <span className="field-label">Author Name</span>
+                <input name="author_name" className="field-input" style={{ paddingLeft: 12 }} defaultValue={c?.author_name || ""} placeholder="e.g. Nandu Jithendran, Managing Director" />
+              </label>
+            </div>
+            <label className="field">
+              <span className="field-label">Author Bio</span>
+              <textarea name="author_bio" rows={5} className="field-input" style={{ paddingLeft: 12, paddingTop: 10, fontFamily: "Inter, sans-serif" }} defaultValue={c?.author_bio || ""} placeholder="A short professional bio — appears on the report's About the Author page, just before the closing page." />
+            </label>
+
+            <button className="btn-primary" type="submit" style={{ width: "fit-content" }}>Save Company Profile</button>
           </form>
         </div>
       </main>

@@ -71,6 +71,20 @@ export async function saveCompanyLogo(storagePath: string) {
   revalidatePath("/company-profile");
 }
 
+export async function saveAuthorPhoto(storagePath: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase
+    .from("company_profiles")
+    .upsert({ id: user!.id, author_photo_storage_path: storagePath });
+  if (error) throw new Error(error.message);
+  revalidatePath("/company-profile");
+}
+
 export async function saveCompanyProfile(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -95,6 +109,8 @@ export async function saveCompanyProfile(formData: FormData) {
     email: String(formData.get("email") || "") || null,
     website: String(formData.get("website") || "") || null,
     portfolio_highlights: highlights,
+    author_name: String(formData.get("author_name") || "") || null,
+    author_bio: String(formData.get("author_bio") || "") || null,
   };
 
   const { error } = await supabase.from("company_profiles").upsert(payload);

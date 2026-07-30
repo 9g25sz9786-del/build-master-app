@@ -13,6 +13,9 @@ export interface CompanyProfile {
   website: string | null;
   portfolio_highlights: string[];
   logo_storage_path: string | null;
+  author_name: string | null;
+  author_bio: string | null;
+  author_photo_storage_path: string | null;
   updated_at: string;
 }
 

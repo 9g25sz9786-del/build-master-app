@@ -11,6 +11,30 @@ export const dynamic = "force-dynamic";
 
 const PROJECT_TYPE_LABEL: Record<string, string> = { hostel: "Hostel", apartment: "Apartment Building", commercial: "Commercial Building" };
 
+const METRIC_DESC: Record<string, string> = {
+  "Total Investment": "Full cost to complete the project — land, construction, professional fees and finance costs combined.",
+  "Annual Revenue": "Total income the project is expected to generate in a typical year.",
+  NOI: "Net Operating Income — annual revenue minus operating expenses, before financing costs.",
+  "Net Profit": "Annual revenue minus operating expenses and debt service — the actual annual return to the owner.",
+  ROI: "Annual net profit as a percentage of total investment.",
+  DSCR: "Debt Service Coverage Ratio — net operating income divided by annual loan repayment. Above 1.2x is generally considered bankable.",
+  Payback: "Time required to recover the total investment from net cash flow.",
+  IRR: "Internal Rate of Return — the annualised return accounting for the timing of every cash flow, including the exit.",
+  NPV: "Net Present Value — today's value of all future cash flows minus the initial investment, at the chosen discount rate.",
+  "Cap Rate": "Capitalisation Rate — net operating income as a percentage of total investment, a standard real estate yield measure.",
+  "Loan / Cost": "Bank loan as a percentage of total project cost. Lower means less leverage and less repayment risk.",
+  "Profit Margin": "Net profit as a percentage of annual revenue.",
+};
+function MetricStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="stat-tile">
+      <div className="stat-label">{label}</div>
+      <div className="stat-value mono">{value}</div>
+      {METRIC_DESC[label] && <div className="stat-desc">{METRIC_DESC[label]}</div>}
+    </div>
+  );
+}
+
 function ScoreGaugeStatic({ score }: { score: number }) {
   const pct = Math.min(10, Math.max(0, score)) / 10;
   const angle = 180 + pct * 180;
@@ -159,6 +183,12 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
             ) : null}
             <span className="report-cover-logo-text">{companyName}</span>
           </div>
+          {(c?.tagline || c?.established_year) && (
+            <div className="report-cover-tagline-row">
+              {c?.tagline && <div className="report-cover-tagline">{c.tagline}</div>}
+              {c?.established_year && <div className="report-cover-since">SINCE {c.established_year}</div>}
+            </div>
+          )}
           <div className="report-cover-content">
             <div className="report-cover-eyebrow"><span className="report-accent-dot" /> Commercial Project Feasibility Report</div>
             <h1 className="report-cover-title">{project.name}<span className="accent">.</span></h1>
@@ -239,24 +269,24 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           <div className="card" style={{ marginBottom: 16 }}>
             <div className="card-head">Cost, Revenue & Profitability</div>
             <div className="metric-grid">
-              <div className="stat-tile"><div className="stat-label">Total Investment</div><div className="stat-value mono">{fmtINR(m.totalInvestment)}</div></div>
-              <div className="stat-tile"><div className="stat-label">Annual Revenue</div><div className="stat-value mono">{fmtINR(m.annualRevenue)}</div></div>
-              <div className="stat-tile"><div className="stat-label">NOI</div><div className="stat-value mono">{fmtINR(m.NOI)}</div></div>
-              <div className="stat-tile"><div className="stat-label">Net Profit</div><div className="stat-value mono">{fmtINR(m.netProfit)}</div></div>
+              <MetricStat label="Total Investment" value={fmtINR(m.totalInvestment)} />
+              <MetricStat label="Annual Revenue" value={fmtINR(m.annualRevenue)} />
+              <MetricStat label="NOI" value={fmtINR(m.NOI)} />
+              <MetricStat label="Net Profit" value={fmtINR(m.netProfit)} />
             </div>
           </div>
 
           <div className="card" style={{ marginBottom: 16 }}>
             <div className="card-head">Investment Metrics</div>
             <div className="metric-grid">
-              <div className="stat-tile"><div className="stat-label">ROI</div><div className="stat-value mono">{fmtNum(m.roiPct)}%</div></div>
-              <div className="stat-tile"><div className="stat-label">DSCR</div><div className="stat-value mono">{m.hasLoan ? fmtNum(m.dscr, 2) + "x" : "No Loan"}</div></div>
-              <div className="stat-tile"><div className="stat-label">Payback</div><div className="stat-value mono">{fmtYears(m.paybackYears)}</div></div>
-              <div className="stat-tile"><div className="stat-label">IRR</div><div className="stat-value mono">{m.irr !== null ? fmtNum(m.irr * 100) + "%" : "n/a"}</div></div>
-              <div className="stat-tile"><div className="stat-label">NPV</div><div className="stat-value mono">{fmtINR(m.npv)}</div></div>
-              <div className="stat-tile"><div className="stat-label">Cap Rate</div><div className="stat-value mono">{fmtNum(m.capRate)}%</div></div>
-              <div className="stat-tile"><div className="stat-label">Loan / Cost</div><div className="stat-value mono">{fmtNum(m.loanToProjectCost, 0)}%</div></div>
-              <div className="stat-tile"><div className="stat-label">Profit Margin</div><div className="stat-value mono">{fmtNum(m.profitMargin)}%</div></div>
+              <MetricStat label="ROI" value={fmtNum(m.roiPct) + "%"} />
+              <MetricStat label="DSCR" value={m.hasLoan ? fmtNum(m.dscr, 2) + "x" : "No Loan"} />
+              <MetricStat label="Payback" value={fmtYears(m.paybackYears)} />
+              <MetricStat label="IRR" value={m.irr !== null ? fmtNum(m.irr * 100) + "%" : "n/a"} />
+              <MetricStat label="NPV" value={fmtINR(m.npv)} />
+              <MetricStat label="Cap Rate" value={fmtNum(m.capRate) + "%"} />
+              <MetricStat label="Loan / Cost" value={fmtNum(m.loanToProjectCost, 0) + "%"} />
+              <MetricStat label="Profit Margin" value={fmtNum(m.profitMargin) + "%"} />
             </div>
           </div>
 
@@ -268,6 +298,34 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
               <div className="card-head" style={{ marginBottom: 4 }}>{m.scoreLabel}</div>
               <p className="report-prose" style={{ fontSize: 13 }}>Risk Level: <b>{m.riskLevel}</b> · {m.bankable}</p>
             </div>
+          </div>
+
+          <div className="card" style={{ marginTop: 16 }}>
+            <div className="card-head">How This Score Was Calculated</div>
+            <p className="report-prose" style={{ fontSize: 12.5, marginBottom: 14 }}>
+              The Investment Score is a weighted average of eight factors, each scored out of 10 and combined by
+              its share of the total (shown as %). This is a deterministic calculation from your project's inputs —
+              not a subjective rating.
+            </p>
+            <div className="report-score-breakdown">
+              {m.scoreFactors.map((f) => (
+                <div className="report-score-row" key={f.key}>
+                  <span className="report-score-row-label">{f.label} <span style={{ color: "#999" }}>({Math.round(f.weight * 100)}%)</span></span>
+                  <div className="report-score-bar-track"><div className="report-score-bar-fill" style={{ width: (f.score / 10) * 100 + "%" }} /></div>
+                  <span className="report-score-row-val">{fmtNum(f.score, 1)}/10</span>
+                </div>
+              ))}
+            </div>
+            <div className="report-score-legend">
+              <span style={{ background: m.overallScore < 3 ? "#C1272D" : "#D9D9D9", color: m.overallScore < 3 ? "#fff" : "#999" }}>1–2 Very Poor</span>
+              <span style={{ background: m.overallScore >= 3 && m.overallScore < 5 ? "#C1272D" : "#D9D9D9", color: m.overallScore >= 3 && m.overallScore < 5 ? "#fff" : "#999" }}>3–4 Poor</span>
+              <span style={{ background: m.overallScore >= 5 && m.overallScore < 7 ? "#C1272D" : "#D9D9D9", color: m.overallScore >= 5 && m.overallScore < 7 ? "#fff" : "#999" }}>5–6 Average</span>
+              <span style={{ background: m.overallScore >= 7 && m.overallScore < 9 ? "#2E8B6F" : "#D9D9D9", color: m.overallScore >= 7 && m.overallScore < 9 ? "#fff" : "#999" }}>7–8 Good</span>
+              <span style={{ background: m.overallScore >= 9 ? "#2E8B6F" : "#D9D9D9", color: m.overallScore >= 9 ? "#fff" : "#999" }}>9–10 Excellent</span>
+            </div>
+            <p className="report-prose" style={{ fontSize: 11.5, marginTop: 12, color: "#999" }}>
+              This project scores {fmtNum(m.overallScore)}/10, placing it in the <b>{m.scoreLabel}</b> band above.
+            </p>
           </div>
         </section>
 
@@ -347,6 +405,26 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
             <ul className="list-plain">{rec.improvements.map((t, i) => <li key={i}>{t}</li>)}</ul>
           </div>
         </section>
+
+        {/* About the Author — just before the closing pages */}
+        {(c?.author_name || c?.author_bio || c?.author_photo_storage_path) && (
+          <div className="report-author">
+            {c?.author_photo_storage_path ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={companyPublicUrl(c.author_photo_storage_path)} alt="" className="report-author-bg" />
+            ) : null}
+            <div className="report-author-overlay" />
+            <div className="report-author-content">
+              <div className="report-author-eyebrow"><span className="report-accent-dot" /> About the Author</div>
+              {c?.author_photo_storage_path && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={companyPublicUrl(c.author_photo_storage_path)} alt={c?.author_name || ""} className="report-author-photo" />
+              )}
+              {c?.author_name && <div className="report-author-name">{c.author_name}</div>}
+              {c?.author_bio && <p className="report-author-bio">{c.author_bio}</p>}
+            </div>
+          </div>
+        )}
 
         {/* Closing: company contact + colophon */}
         <div className="report-final-cta">

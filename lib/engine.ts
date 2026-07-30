@@ -322,6 +322,16 @@ export function computeAll(s: ProjectState, adj: Adjustment = { occDelta: 0, cos
     irr, npv, cashOnCashReturn, exitValue, holdYears,
     cashFlowSeries, loanSeries, costBreakdown,
     overallScore, scoreLabel, riskLevel, bankable, investorFit, maxSafeLoan, hasLoan, assetSecurity,
+    scoreFactors: [
+      { key: "roi", label: "Return on Investment", score: roiScore, weight: weights.roi },
+      { key: "payback", label: "Payback Period", score: paybackScore, weight: weights.payback },
+      { key: "profitMargin", label: "Profit Margin", score: profitMarginScore, weight: weights.profitMargin },
+      { key: "dscr", label: "Debt Service Coverage", score: dscrScore, weight: weights.dscr },
+      { key: "loanRatio", label: "Loan-to-Cost Ratio", score: loanRatioScore, weight: weights.loanRatio },
+      { key: "occupancy", label: "Occupancy", score: occupancyScore, weight: weights.occupancy },
+      { key: "cashFlow", label: "Cash Flow", score: cashFlowScore, weight: weights.cashFlow },
+      { key: "rentalYield", label: "Rental Yield", score: rentalYieldScore, weight: weights.rentalYield },
+    ],
   };
 }
 
