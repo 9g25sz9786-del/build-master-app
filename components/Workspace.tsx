@@ -768,6 +768,7 @@ export default function Workspace({ project, userEmail }: { project: { id: strin
           <Link href="/compare" className="nav-btn"><GitCompare size={16} strokeWidth={2} /> Compare</Link>
           <Link href="/media" className="nav-btn"><ImageIcon size={16} strokeWidth={2} /> Project Media</Link>
           <Link href={`/media/${project.id}`} className="nav-btn" style={{ paddingLeft: 32, fontSize: 12 }}>This project's media →</Link>
+          <Link href={`/intro/${project.id}`} className="nav-btn" style={{ paddingLeft: 32, fontSize: 12 }}>This project's intro →</Link>
           <Link href={`/projects/${project.id}/full-report`} className="nav-btn" target="_blank"><ScrollText size={16} strokeWidth={2} /> Full Printable Report</Link>
         </nav>
         <div className="sidebar-footer">

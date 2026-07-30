@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutGrid, GitCompare, LogOut, Image as ImageIcon, Building2, Users } from "lucide-react";
+import { LayoutGrid, GitCompare, LogOut, Image as ImageIcon, Building2, Users, BookOpen } from "lucide-react";
 import { signOut } from "@/app/actions";
 
 export default function Sidebar({
@@ -9,7 +9,7 @@ export default function Sidebar({
   scoreBadge,
   role = "owner",
 }: {
-  active: "projects" | "compare" | "workspace" | "media" | "company-profile" | "team";
+  active: "projects" | "compare" | "workspace" | "media" | "company-profile" | "team" | "intro";
   userEmail?: string | null;
   scoreBadge?: { value: string; label: string } | null;
   role?: "owner" | "designer";
@@ -38,6 +38,9 @@ export default function Sidebar({
             </Link>
             <Link href="/media" className={"nav-btn" + (active === "media" ? " active" : "")}>
               <ImageIcon size={16} strokeWidth={2} /> Project Media
+            </Link>
+            <Link href="/intro" className={"nav-btn" + (active === "intro" ? " active" : "")}>
+              <BookOpen size={16} strokeWidth={2} /> Project Intro
             </Link>
             <Link href="/company-profile" className={"nav-btn" + (active === "company-profile" ? " active" : "")}>
               <Building2 size={16} strokeWidth={2} /> Company Profile

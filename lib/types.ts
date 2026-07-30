@@ -45,6 +45,16 @@ export interface CompanyProfileSection {
   created_at: string;
 }
 
+export interface ProjectIntroSection {
+  id: string;
+  project_id: string;
+  title: string;
+  body: string;
+  photos: SectionPhoto[];
+  sort_order: number;
+  created_at: string;
+}
+
 export interface TeamMember {
   id: string;
   owner_id: string;

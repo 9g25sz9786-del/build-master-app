@@ -1,11 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
-import CompanySections from "@/components/CompanySections";
 import CompanyLogoUpload from "@/components/CompanyLogoUpload";
 import { saveCompanyProfile } from "@/app/actions";
 import { Building2 } from "lucide-react";
-import { CompanyProfile, CompanyProfileSection } from "@/lib/types";
+import { CompanyProfile } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -25,12 +24,6 @@ export default async function CompanyProfilePage() {
     .eq("id", user.id)
     .single();
 
-  const { data: sections } = await supabase
-    .from("company_profile_sections")
-    .select("*")
-    .eq("owner_id", user.id)
-    .order("sort_order", { ascending: true });
-
   const c = (company as CompanyProfile) || null;
 
   return (
@@ -42,7 +35,7 @@ export default async function CompanyProfilePage() {
             <div className="step-stamp"><Building2 size={14} /></div>
             <div>
               <h2 className="step-title">Company Profile</h2>
-              <p className="step-subtitle">The Basics appear on every report's cover and contact block. Add as many Content Sections as you need below — each becomes its own heading, paragraph and photo gallery in the report's introduction.</p>
+              <p className="step-subtitle">Your company name, logo and contact details — shared across every project. This appears on each report's cover and closing page. For the actual story of a specific project (heading + text + photos), use <b>Project Intro</b> on that project instead.</p>
             </div>
           </div>
 
@@ -85,15 +78,6 @@ export default async function CompanyProfilePage() {
             </div>
             <button className="btn-primary" type="submit" style={{ width: "fit-content" }}>Save The Basics</button>
           </form>
-
-          <div className="step-header" style={{ marginTop: 8 }}>
-            <div className="step-stamp">+</div>
-            <div>
-              <h2 className="step-title" style={{ fontSize: 17 }}>Content Sections</h2>
-              <p className="step-subtitle">e.g. "Building More than Structures", "Where it Began" — paste long text and add photos for each.</p>
-            </div>
-          </div>
-          <CompanySections initialSections={(sections as CompanyProfileSection[]) || []} />
         </div>
       </main>
     </div>

@@ -271,11 +271,16 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .report-final-cta h3 { font-family:'Poppins',sans-serif; font-size:22px; margin:0 0 10px; }
 .report-final-cta p { color:#C9C4B5; font-size:13px; }
 .report-final-cta .report-accent-dot { margin:0 auto 16px; }
+
+.report-colophon { background:#0E0E0E; padding:60px 44px 70px; text-align:center; border-top:1px solid #262626; }
+.report-colophon-logo { width:104px; height:104px; border-radius:22px; margin:0 auto 20px; display:block; object-fit:cover; box-shadow:0 0 0 4px rgba(242,182,50,0.15); }
+.report-colophon-name { color:#fff; font-family:'Poppins',sans-serif; font-weight:700; font-size:24px; letter-spacing:.01em; }
+.report-colophon-sub { color:#8A8A8A; font-size:12px; margin-top:8px; font-family:'IBM Plex Mono',monospace; letter-spacing:.03em; }
 @media print {
   .no-print { display:none !important; }
   .report-topbar { display:none !important; }
   .report-cover { break-inside: avoid-page; }
-  .report-topic, .report-toc, .report-final-cta { break-inside: avoid-page; page-break-inside: avoid; }
+  .report-topic, .report-toc, .report-final-cta, .report-colophon { break-inside: avoid-page; page-break-inside: avoid; }
   .report-section { break-inside: avoid-page; page-break-inside: avoid; }
   body { background:#FFFFFF; }
   .report-cover-bg, .report-cover-placeholder, .report-topic-hero img, .report-topic-hero svg, .report-media-card img, .report-topic-grid img {

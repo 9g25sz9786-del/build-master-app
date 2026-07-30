@@ -168,7 +168,73 @@ export async function deleteProjectMedia(id: string, projectId: string) {
   revalidatePath(`/projects/${projectId}`);
 }
 
-/* ─────────────────────────────── Company Profile Sections ─────────────────────────────── */
+/* ─────────────────────────────── Project Intro Sections ─────────────────────────────── */
+
+export async function createProjectIntroSection(projectId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data, error } = await supabase
+    .from("project_intro_sections")
+    .insert({ project_id: projectId, title: "New Section", body: "", sort_order: Date.now() })
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  revalidatePath(`/intro/${projectId}`);
+  return data;
+}
+
+export async function updateProjectIntroSection(id: string, title: string, body: string, projectId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("project_intro_sections").update({ title, body }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/intro/${projectId}`);
+}
+
+export async function deleteProjectIntroSection(id: string, projectId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("project_intro_sections").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/intro/${projectId}`);
+}
+
+export async function addIntroSectionPhoto(sectionId: string, storagePath: string, caption: string, projectId: string) {
+  const supabase = await createClient();
+  const { data: existing, error: readErr } = await supabase
+    .from("project_intro_sections")
+    .select("photos")
+    .eq("id", sectionId)
+    .single();
+  if (readErr) throw new Error(readErr.message);
+
+  const photos = Array.isArray(existing?.photos) ? existing!.photos : [];
+  photos.push({ storage_path: storagePath, caption });
+
+  const { error } = await supabase.from("project_intro_sections").update({ photos }).eq("id", sectionId);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/intro/${projectId}`);
+}
+
+export async function removeIntroSectionPhoto(sectionId: string, storagePath: string, projectId: string) {
+  const supabase = await createClient();
+  const { data: existing, error: readErr } = await supabase
+    .from("project_intro_sections")
+    .select("photos")
+    .eq("id", sectionId)
+    .single();
+  if (readErr) throw new Error(readErr.message);
+
+  const photos = (Array.isArray(existing?.photos) ? existing!.photos : []).filter(
+    (p: any) => p.storage_path !== storagePath
+  );
+
+  const { error } = await supabase.from("project_intro_sections").update({ photos }).eq("id", sectionId);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/intro/${projectId}`);
+}
 
 export async function createCompanySection() {
   const supabase = await createClient();

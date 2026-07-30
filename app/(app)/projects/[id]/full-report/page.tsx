@@ -3,7 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftCircle } from "lucide-react";
 import { computeAll, buildRecommendation, fmtINR, fmtNum, fmtYears, ProjectState } from "@/lib/engine";
-import { CompanyProfile, ProjectMedia, CompanyProfileSection } from "@/lib/types";
+import { CompanyProfile, ProjectMedia, ProjectIntroSection } from "@/lib/types";
 import PrintButton from "@/components/PrintButton";
 import ReportCharts from "@/components/ReportCharts";
 
@@ -96,14 +96,12 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
     .eq("id", project.user_id)
     .single();
 
-  const { data: companySectionsRaw } = await supabase
-    .from("company_profile_sections")
+  const { data: introSectionsRaw } = await supabase
+    .from("project_intro_sections")
     .select("*")
-    .eq("owner_id", project.user_id)
+    .eq("project_id", id)
     .order("sort_order", { ascending: true });
-  const companySections = (companySectionsRaw as CompanyProfileSection[]) || [];
-  const companyPublicUrl = (path: string) =>
-    supabase.storage.from("company-media").getPublicUrl(path).data.publicUrl;
+  const introSections = (introSectionsRaw as ProjectIntroSection[]) || [];
 
   const { data: mediaRows } = await supabase
     .from("project_media")
@@ -114,6 +112,8 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
   const media = (mediaRows as ProjectMedia[]) || [];
   const publicUrl = (path: string) =>
     supabase.storage.from("project-media").getPublicUrl(path).data.publicUrl;
+  const companyPublicUrl = (path: string) =>
+    supabase.storage.from("company-media").getPublicUrl(path).data.publicUrl;
 
   const state = project.data as ProjectState;
   const m = computeAll(state);
@@ -129,7 +129,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
   const companyName = c?.company_name || "Maharaja Engineers & Contractors";
 
   const TOC = [
-    { n: "01", label: "Company Profile" },
+    { n: "01", label: "Project Introduction" },
     { n: "02", label: "Project Feasibility Analysis" },
     ...(media.length > 0 ? [{ n: "03", label: "Renderings, Plans & Site Photos" }] : []),
     { n: media.length > 0 ? "04" : "03", label: "Conclusion & Recommendation" },
@@ -183,25 +183,17 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           </div>
         </div>
 
-        {/* 1. Introduction / Company Profile */}
+        {/* 1. Project Introduction */}
         <section className="report-section">
-          <h2 className="report-section-title"><span className="report-section-num">01</span> Company Profile</h2>
-          <div className="report-contact-grid" style={{ marginBottom: 26 }}>
-            {c?.established_year && <div><b>Established:</b> {c.established_year}</div>}
-            {c?.completed_projects_count && <div><b>Completed Projects:</b> {c.completed_projects_count}+</div>}
-            {c?.phone && <div><b>Phone:</b> {c.phone}</div>}
-            {c?.email && <div><b>Email:</b> {c.email}</div>}
-            {c?.website && <div><b>Website:</b> {c.website}</div>}
-            {c?.address && <div><b>Address:</b> {c.address}</div>}
-          </div>
+          <h2 className="report-section-title"><span className="report-section-num">01</span> Project Introduction</h2>
 
-          {companySections.length === 0 ? (
+          {introSections.length === 0 ? (
             <p className="report-prose">
-              No company profile content yet. Add sections (heading + text + photos) from the Company Profile page —
-              they'll appear here automatically, in order, laid out exactly like this.
+              No introduction content yet for this project. Add sections (heading + text + photos) from
+              this project's <b>Project Intro</b> page — they'll appear here automatically, in order, laid out exactly like this.
             </p>
           ) : (
-            companySections.map((s) => (
+            introSections.map((s) => (
               <div key={s.id} className="report-topic">
                 <div className="report-topic-heading-row">
                   <span className="report-accent-dot" />
@@ -211,7 +203,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
                 <div className="report-topic-hero">
                   {s.photos && s.photos.length > 0 ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={companyPublicUrl(s.photos[0].storage_path)} alt="" />
+                    <img src={publicUrl(s.photos[0].storage_path)} alt="" />
                   ) : (
                     <TopicPlaceholder />
                   )}
@@ -220,7 +212,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
                   <div className="report-topic-grid">
                     {s.photos.slice(1).map((p) => (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img key={p.storage_path} src={companyPublicUrl(p.storage_path)} alt="" />
+                      <img key={p.storage_path} src={publicUrl(p.storage_path)} alt="" />
                     ))}
                   </div>
                 )}
@@ -356,10 +348,26 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           </div>
         </section>
 
+        {/* Closing: company contact + colophon */}
         <div className="report-final-cta">
           <span className="report-accent-dot" style={{ display: "block", margin: "0 auto 16px" }} />
           <h3>{companyName}</h3>
-          <p>{c?.tagline || "Building trust, one project at a time."} — Report prepared {today}</p>
+          <p>{c?.tagline || "Building trust, one project at a time."}</p>
+          <div className="report-contact-grid" style={{ justifyContent: "center", textAlign: "center", color: "#C9C4B5", marginTop: 18 }}>
+            {c?.established_year && <div>Established {c.established_year}</div>}
+            {c?.completed_projects_count && <div>{c.completed_projects_count}+ Projects Completed</div>}
+            {c?.phone && <div>{c.phone}</div>}
+            {c?.email && <div>{c.email}</div>}
+            {c?.website && <div>{c.website}</div>}
+            {c?.address && <div>{c.address}</div>}
+          </div>
+        </div>
+
+        <div className="report-colophon">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Build Master" className="report-colophon-logo" />
+          <div className="report-colophon-name">Build Master</div>
+          <div className="report-colophon-sub">Project Feasibility Intelligence · Report generated {today}</div>
         </div>
       </div>
     </div>
