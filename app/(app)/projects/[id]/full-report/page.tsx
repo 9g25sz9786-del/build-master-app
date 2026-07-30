@@ -5,6 +5,7 @@ import { ArrowLeftCircle } from "lucide-react";
 import { computeAll, buildRecommendation, fmtINR, fmtNum, fmtYears, ProjectState } from "@/lib/engine";
 import { CompanyProfile, ProjectMedia, ProjectIntroSection } from "@/lib/types";
 import PrintButton from "@/components/PrintButton";
+import PagedPreviewButton from "@/components/PagedPreviewButton";
 import ReportCharts from "@/components/ReportCharts";
 
 export const dynamic = "force-dynamic";
@@ -167,10 +168,13 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
     <div className="report-page">
       <div className="report-topbar no-print">
         <Link href={`/projects/${id}`} className="btn-ghost"><ArrowLeftCircle size={16} /> Back to Project</Link>
-        <PrintButton />
+        <div style={{ display: "flex", gap: 10 }}>
+          <PagedPreviewButton />
+          <PrintButton />
+        </div>
       </div>
 
-      <div className="report-doc">
+      <div className="report-doc" id="report-content">
         {/* Cover */}
         <div className="report-cover">
           {coverImage ? (

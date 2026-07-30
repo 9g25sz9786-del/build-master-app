@@ -356,6 +356,37 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
   }
 }
 
+/* Paged.js on-screen print preview overlay */
+.pagedjs-print-overlay { position: fixed; inset: 0; z-index: 9999; background: #52565A; overflow: auto; }
+.pagedjs-print-overlay-header {
+  position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; background: #1A1712; color: #fff; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px;
+}
+.pagedjs-print-overlay-header .btn-ghost { background: #fff; }
+.pagedjs-loading { display: flex; align-items: center; justify-content: center; gap: 10px; color: #fff; padding: 60px 0; font-size: 14px; }
+.spin { animation: pagedjs-spin 1s linear infinite; }
+@keyframes pagedjs-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.pagedjs-print-canvas { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 24px 0 60px; }
+.pagedjs-print-canvas .pagedjs_page {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  background: #fff;
+}
+
+@media print {
+  /* When the preview overlay is open, print only its content, full-bleed,
+     instead of the underlying app page. */
+  body:has(.pagedjs-print-overlay) > *:not(.pagedjs-print-overlay) { display: none !important; }
+  .pagedjs-print-overlay {
+    position: static !important;
+    background: none !important;
+    overflow: visible !important;
+    inset: auto !important;
+  }
+  .pagedjs-print-overlay-header, .pagedjs-loading { display: none !important; }
+  .pagedjs-print-canvas { padding: 0 !important; gap: 0 !important; }
+  .pagedjs-print-canvas .pagedjs_page { box-shadow: none !important; }
+}
+
 /* Company profile content sections */
 .section-card { display:flex; flex-direction:column; gap:0; }
 .section-card-head { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
