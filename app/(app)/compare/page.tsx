@@ -61,7 +61,7 @@ export default async function ComparePage() {
                     ["Payback", (r: any) => fmtYears(r.m.paybackYears)],
                     ["IRR", (r: any) => (r.m.irr !== null ? fmtNum(r.m.irr * 100) + "%" : "n/a")],
                     ["NPV", (r: any) => fmtINR(r.m.npv)],
-                    ["DSCR", (r: any) => fmtNum(r.m.dscr, 2) + "x"],
+                    ["DSCR", (r: any) => (r.m.hasLoan ? fmtNum(r.m.dscr, 2) + "x" : "No Loan")],
                     ["Cash Flow (annual)", (r: any) => fmtINR(r.m.netProfit)],
                     ["Score", (r: any) => fmtNum(r.m.overallScore) + "/10"],
                     ["Risk", (r: any) => r.m.riskLevel],

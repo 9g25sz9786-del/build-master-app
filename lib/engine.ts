@@ -187,7 +187,8 @@ export function computeAll(s: ProjectState, adj: Adjustment = { occDelta: 0, cos
   const returnOnEquity = (f.ownCapital || 0) > 0 ? (netProfit / f.ownCapital) * 100 : 0;
   const loanToEquity = (f.ownCapital || 0) > 0 ? ((f.bankLoan || 0) / f.ownCapital) * 100 : 0;
   const loanToProjectCost = totalInvestment > 0 ? ((f.bankLoan || 0) / totalInvestment) * 100 : 0;
-  const dscr = annualDebtService > 0 ? NOI / annualDebtService : 0;
+  const hasLoan = (f.bankLoan || 0) > 0;
+  const dscr = !hasLoan ? Infinity : annualDebtService > 0 ? NOI / annualDebtService : 0;
   const profitMargin = annualRevenue > 0 ? (netProfit / annualRevenue) * 100 : 0;
   const operatingMargin = annualRevenue > 0 ? (NOI / annualRevenue) * 100 : 0;
   const netMargin = profitMargin;
@@ -267,7 +268,7 @@ export function computeAll(s: ProjectState, adj: Adjustment = { occDelta: 0, cos
   const profitMarginScore = mapRange(profitMargin, [[0,1],[5,3],[15,5],[25,7],[35,9],[50,10]]);
   const loanRatioScore = mapRange(loanToProjectCost, [[30,10],[50,8],[65,6],[80,4],[95,2],[100,1]]);
   const occupancyScore = occupancyInput === null ? 7 : mapRange(occupancyInput, [[40,2],[60,5],[75,7],[85,9],[95,10]]);
-  const dscrScore = isSaleModel ? 7 : dscr <= 0 ? 1 : mapRange(dscr, [[0.8,1],[1.0,3],[1.2,5],[1.35,7],[1.5,9],[2,10]]);
+  const dscrScore = isSaleModel ? 7 : !hasLoan ? 10 : dscr <= 0 ? 1 : mapRange(dscr, [[0.8,1],[1.0,3],[1.2,5],[1.35,7],[1.5,9],[2,10]]);
   const cfRatio = totalInvestment > 0 ? (netProfit / totalInvestment) * 100 : 0;
   const cashFlowScore = cfRatio > 0 ? mapRange(cfRatio, [[0,5],[5,7],[10,8],[20,10]]) : mapRange(cfRatio, [[-20,1],[-5,3],[0,5]]);
   const rentalYieldScore = isSaleModel ? 7 : mapRange(rentalYield, [[2,2],[4,4],[6,6],[8,8],[10,10]]);
@@ -285,9 +286,14 @@ export function computeAll(s: ProjectState, adj: Adjustment = { occDelta: 0, cos
 
   const bankable = isSaleModel
     ? (loanToProjectCost <= 75 ? "Suitable — sale proceeds comfortably cover the loan principal." : "Marginal — loan exposure is high relative to project cost.")
+    : !hasLoan ? "No bank loan involved — the project is fully self-funded, so debt-service coverage does not apply."
     : dscr >= 1.2 && loanToProjectCost <= 75 ? "Yes — meets standard 1.2x DSCR and loan-to-cost thresholds."
     : dscr >= 1.0 ? "Marginal — may need higher equity contribution or rate negotiation."
     : "Not recommended — insufficient debt service coverage at current terms.";
+
+  const assetSecurity = !isSaleModel && loanToProjectCost < 40
+    ? "Because leverage is low, the land (held in the developer's own name) and the completed structure together provide substantial collateral security for the capital invested, independent of ongoing cash flow performance."
+    : null;
 
   const investorFit = overallScore >= 7 && roiPct > 12 ? "Strong fit for return-focused investors."
     : overallScore >= 5 ? "Conditional fit — recommend reviewing downside sensitivities before committing."
@@ -315,7 +321,7 @@ export function computeAll(s: ProjectState, adj: Adjustment = { occDelta: 0, cos
     investmentPerRoom, investmentPerBed,
     irr, npv, cashOnCashReturn, exitValue, holdYears,
     cashFlowSeries, loanSeries, costBreakdown,
-    overallScore, scoreLabel, riskLevel, bankable, investorFit, maxSafeLoan,
+    overallScore, scoreLabel, riskLevel, bankable, investorFit, maxSafeLoan, hasLoan, assetSecurity,
   };
 }
 
@@ -326,13 +332,15 @@ export function buildRecommendation(m: Metrics) {
   const type = m.type;
 
   if (m.roiPct > 15) strengths.push(`Annual ROI of ${fmtNum(m.roiPct)}% comfortably exceeds typical ${type} benchmarks of 10-12%.`);
-  if (!m.isSaleModel && m.dscr >= 1.25) strengths.push(`Debt service coverage of ${fmtNum(m.dscr,2)}x gives lenders a comfortable repayment cushion.`);
+  if (!m.isSaleModel && m.hasLoan && m.dscr >= 1.25) strengths.push(`Debt service coverage of ${fmtNum(m.dscr,2)}x gives lenders a comfortable repayment cushion.`);
+  if (!m.isSaleModel && !m.hasLoan) strengths.push("The project carries no bank debt at all — it is fully self-funded, which removes debt-service risk entirely.");
+  if (m.assetSecurity) strengths.push(m.assetSecurity);
   if (m.loanToProjectCost < 50) strengths.push(`Leverage is conservative at ${fmtNum(m.loanToProjectCost,0)}% of project cost, limiting downside exposure.`);
   if (!m.isSaleModel && m.rentalYield > 7) strengths.push(`Gross yield of ${fmtNum(m.rentalYield)}% is attractive relative to typical commercial benchmarks (6-8%).`);
   if (m.profitMargin > 25) strengths.push(`Profit margin of ${fmtNum(m.profitMargin)}% indicates strong pricing power relative to costs.`);
   if (strengths.length === 0) strengths.push("The project clears its direct costs, but margins are thin — treat this as a base case rather than a strength.");
 
-  if (!m.isSaleModel && m.dscr < 1.2) weaknesses.push(`DSCR of ${fmtNum(m.dscr,2)}x sits below the 1.2x threshold most banks require for commercial lending.`);
+  if (!m.isSaleModel && m.hasLoan && m.dscr < 1.2) weaknesses.push(`DSCR of ${fmtNum(m.dscr,2)}x sits below the 1.2x threshold most banks require for commercial lending.`);
   if (m.loanToProjectCost > 75) weaknesses.push(`Leverage of ${fmtNum(m.loanToProjectCost,0)}% of project cost is high and raises refinancing risk.`);
   if (isFinite(m.paybackYears) && m.paybackYears > 10) weaknesses.push(`Payback period of ${fmtYears(m.paybackYears)} is longer than the 7-10 year comfort zone for this asset type.`);
   if (!isFinite(m.paybackYears) || m.netProfit <= 0) weaknesses.push("Net cash flow is currently negative or break-even after debt service — revenue or cost assumptions need revisiting.");
@@ -340,16 +348,17 @@ export function buildRecommendation(m: Metrics) {
   if (weaknesses.length === 0) weaknesses.push("No material weaknesses stand out at current assumptions — stress-test occupancy and cost overruns regardless.");
 
   risks.push(`A 10% rise in construction cost would move project cost to ${fmtINR(m.totalProjectCost*1.1)}, compressing ROI accordingly — see the sensitivity panel.`);
-  if (!m.isSaleModel) risks.push("Every 1 percentage point rise in interest rate increases annual debt service meaningfully; re-run Finance inputs to quantify at your loan size.");
-  if (!m.isSaleModel) risks.push("Revenue is occupancy-dependent — a prolonged vacancy period directly erodes DSCR and equity cash flow.");
+  if (!m.isSaleModel && m.hasLoan) risks.push("Every 1 percentage point rise in interest rate increases annual debt service meaningfully; re-run Finance inputs to quantify at your loan size.");
+  if (!m.isSaleModel && m.hasLoan) risks.push("Revenue is occupancy-dependent — a prolonged vacancy period directly erodes DSCR and equity cash flow.");
+  if (!m.isSaleModel && !m.hasLoan) risks.push("Revenue is still occupancy-dependent — a prolonged vacancy period reduces net cash flow, even without debt-service pressure.");
   if (m.isSaleModel) risks.push("As a one-time sale model, the entire return depends on completing sales within the assumed project duration — delays compress annualised returns sharply.");
 
   if (!m.isSaleModel) {
     improvements.push(`Raising occupancy by 10 percentage points would lift annual revenue toward ${fmtINR(m.annualRevenue*1.1)} and improve both DSCR and ROI — see the What-If sliders.`);
-    improvements.push("A 1% reduction in interest rate materially lowers annual debt service and improves cash-on-cash return without touching revenue assumptions.");
+    if (m.hasLoan) improvements.push("A 1% reduction in interest rate materially lowers annual debt service and improves cash-on-cash return without touching revenue assumptions.");
   }
   improvements.push(`Trimming construction cost by 5% would reduce total project cost to roughly ${fmtINR(m.totalProjectCost*0.95)}, directly improving ROI and payback.`);
-  if (m.maxSafeLoan !== null) improvements.push(`Maximum safe loan amount at a 1.2x DSCR target is approximately ${fmtINR(m.maxSafeLoan)} — compare this against your current bank loan input.`);
+  if (m.maxSafeLoan !== null) improvements.push(`Maximum safe loan amount at a 1.2x DSCR target is approximately ${fmtINR(m.maxSafeLoan)} — useful if you decide to bring in bank financing later.`);
 
   const verdict = `This ${type} project scores ${fmtNum(m.overallScore)}/10 (${m.scoreLabel}). Risk is assessed as ${m.riskLevel}. ${m.bankable} ${m.investorFit}`;
   return { strengths, weaknesses, risks, improvements, verdict };

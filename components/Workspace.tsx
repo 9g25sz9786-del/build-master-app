@@ -345,17 +345,47 @@ function StepConstruction({ state, dispatch, m }: { state: ProjectState; dispatc
   );
 }
 function StepFinance({ state, dispatch, m }: { state: ProjectState; dispatch: any; m: Metrics }) {
+  const hasLoan = state.finance.bankLoan !== null && state.finance.bankLoan !== undefined;
+  const ownCapital = state.finance.ownCapital || 0;
+  const coveragePct = m.totalProjectCost > 0 ? (ownCapital / m.totalProjectCost) * 100 : 0;
   return (
     <div className="view">
       <StepHeader n={4} title="Finance" subtitle="Capital structure and lending terms." />
-      <div className="card"><FieldGrid defs={FINANCE_FIELDS} section="finance" state={state} dispatch={dispatch} /></div>
+      <div className="card">
+        <div className="toggle-row">
+          <span className="field-label">Funding Structure</span>
+          <div className="toggle-group">
+            <button
+              className={"toggle-btn" + (hasLoan ? " active" : "")}
+              onClick={() => dispatch({ type: "SET", section: "finance", key: "bankLoan", value: state.finance.bankLoan || 0 })}
+            >
+              With Bank Loan
+            </button>
+            <button
+              className={"toggle-btn" + (!hasLoan ? " active" : "")}
+              onClick={() => dispatch({ type: "SET", section: "finance", key: "bankLoan", value: null })}
+            >
+              No Bank Loan (Self-Funded)
+            </button>
+          </div>
+        </div>
+        <FieldGrid defs={FINANCE_FIELDS} section="finance" state={state} dispatch={dispatch} />
+      </div>
       <div className="card"><div className="card-head">Modelling Assumptions</div><FieldGrid defs={FINANCE_ASSUMPTIONS} section="finance" state={state} dispatch={dispatch} /></div>
       <div className="card">
         <div className="card-head">Auto-calculated</div>
-        <SummaryRow label="EMI (monthly)" value={fmtINR(m.emi)} />
-        <SummaryRow label="Annual Debt Service" value={fmtINR(m.annualDebtService)} />
-        <SummaryRow label="Total Interest over Tenure" value={fmtINR(m.totalInterestOverTenure)} />
-        <SummaryRow label="Interest During Construction" value={fmtINR(m.interestDuringConstruction)} />
+        {hasLoan ? (
+          <>
+            <SummaryRow label="EMI (monthly)" value={fmtINR(m.emi)} />
+            <SummaryRow label="Annual Debt Service" value={fmtINR(m.annualDebtService)} />
+            <SummaryRow label="Total Interest over Tenure" value={fmtINR(m.totalInterestOverTenure)} />
+            <SummaryRow label="Interest During Construction" value={fmtINR(m.interestDuringConstruction)} />
+          </>
+        ) : (
+          <p className="note" style={{ marginTop: 0 }}>No bank loan — the project is fully funded by own capital. Debt service and DSCR do not apply.</p>
+        )}
+        <SummaryRow label="Own Capital" value={fmtINR(ownCapital)} />
+        <SummaryRow label="Own Capital Coverage of Total Project Cost" value={fmtNum(coveragePct, 0) + "%"} />
         <SummaryRow label="Total Project Cost" value={fmtINR(m.totalProjectCost)} strong />
       </div>
     </div>
@@ -475,7 +505,7 @@ function Results({ m, adj, setAdj, mAdj }: { m: Metrics; adj: { occDelta: number
           <StatTile label="Return on Equity" value={fmtNum(m.returnOnEquity) + "%"} />
           <StatTile label="Loan / Equity" value={fmtNum(m.loanToEquity, 0) + "%"} />
           <StatTile label="Loan / Project Cost" value={fmtNum(m.loanToProjectCost, 0) + "%"} />
-          <StatTile label="DSCR" value={fmtNum(m.dscr, 2) + "x"} tone={m.dscr >= 1.25 ? "good" : m.dscr >= 1 ? "mid" : "bad"} />
+          <StatTile label="DSCR" value={m.hasLoan ? fmtNum(m.dscr, 2) + "x" : "No Loan"} tone={!m.hasLoan ? "good" : m.dscr >= 1.25 ? "good" : m.dscr >= 1 ? "mid" : "bad"} />
           <StatTile label="Profit Margin" value={fmtNum(m.profitMargin) + "%"} />
           <StatTile label="Operating Margin" value={fmtNum(m.operatingMargin) + "%"} />
           <StatTile label="Net Margin" value={fmtNum(m.netMargin) + "%"} />
@@ -525,7 +555,7 @@ function Results({ m, adj, setAdj, mAdj }: { m: Metrics; adj: { occDelta: number
         <div className="metric-grid" style={{ marginTop: 14 }}>
           <StatTile label="Adjusted ROI" value={fmtNum(mAdj.roiPct) + "%"} tone={mAdj.roiPct > 12 ? "good" : mAdj.roiPct > 6 ? "mid" : "bad"} />
           <StatTile label="Adjusted NOI" value={fmtINR(mAdj.NOI)} />
-          <StatTile label="Adjusted DSCR" value={fmtNum(mAdj.dscr, 2) + "x"} tone={mAdj.dscr >= 1.25 ? "good" : mAdj.dscr >= 1 ? "mid" : "bad"} />
+          <StatTile label="Adjusted DSCR" value={mAdj.hasLoan ? fmtNum(mAdj.dscr, 2) + "x" : "No Loan"} tone={!mAdj.hasLoan ? "good" : mAdj.dscr >= 1.25 ? "good" : mAdj.dscr >= 1 ? "mid" : "bad"} />
           <StatTile label="Adjusted Score" value={fmtNum(mAdj.overallScore) + "/10"} />
         </div>
       </div>

@@ -258,7 +258,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
             <div className="card-head">Investment Metrics</div>
             <div className="metric-grid">
               <div className="stat-tile"><div className="stat-label">ROI</div><div className="stat-value mono">{fmtNum(m.roiPct)}%</div></div>
-              <div className="stat-tile"><div className="stat-label">DSCR</div><div className="stat-value mono">{fmtNum(m.dscr, 2)}x</div></div>
+              <div className="stat-tile"><div className="stat-label">DSCR</div><div className="stat-value mono">{m.hasLoan ? fmtNum(m.dscr, 2) + "x" : "No Loan"}</div></div>
               <div className="stat-tile"><div className="stat-label">Payback</div><div className="stat-value mono">{fmtYears(m.paybackYears)}</div></div>
               <div className="stat-tile"><div className="stat-label">IRR</div><div className="stat-value mono">{m.irr !== null ? fmtNum(m.irr * 100) + "%" : "n/a"}</div></div>
               <div className="stat-tile"><div className="stat-label">NPV</div><div className="stat-value mono">{fmtINR(m.npv)}</div></div>
