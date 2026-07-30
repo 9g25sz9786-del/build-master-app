@@ -178,10 +178,13 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           <div className="report-cover-overlay" />
           <div className="report-cover-logo-row">
             {c?.logo_storage_path ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={companyPublicUrl(c.logo_storage_path)} alt={companyName} />
-            ) : null}
-            <span className="report-cover-logo-text">{companyName}</span>
+              <div className="report-cover-logo-band">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={companyPublicUrl(c.logo_storage_path)} alt={companyName} />
+              </div>
+            ) : (
+              <span className="report-cover-logo-text">{companyName}</span>
+            )}
           </div>
           {(c?.tagline || c?.established_year) && (
             <div className="report-cover-tagline-row">
@@ -415,13 +418,15 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
             ) : null}
             <div className="report-author-overlay" />
             <div className="report-author-content">
-              <div className="report-author-eyebrow"><span className="report-accent-dot" /> About the Author</div>
+              <div className="report-author-text">
+                <div className="report-author-eyebrow"><span className="report-accent-dot" /> About the Author</div>
+                {c?.author_name && <div className="report-author-name">{c.author_name}</div>}
+                {c?.author_bio && <p className="report-author-bio">{c.author_bio}</p>}
+              </div>
               {c?.author_photo_storage_path && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={companyPublicUrl(c.author_photo_storage_path)} alt={c?.author_name || ""} className="report-author-photo" />
               )}
-              {c?.author_name && <div className="report-author-name">{c.author_name}</div>}
-              {c?.author_bio && <p className="report-author-bio">{c.author_bio}</p>}
             </div>
           </div>
         )}
