@@ -37,6 +37,15 @@ export async function deleteProject(id: string) {
   redirect("/projects");
 }
 
+export async function renameProject(id: string, name: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("projects").update({ name }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/projects");
+  revalidatePath(`/projects/${id}`);
+  revalidatePath("/compare");
+}
+
 export async function saveProject(id: string, name: string, projectType: string, data: unknown) {
   const supabase = await createClient();
   const { error } = await supabase

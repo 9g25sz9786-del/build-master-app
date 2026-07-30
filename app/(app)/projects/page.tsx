@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { computeAll, fmtINR, fmtNum, ProjectState } from "@/lib/engine";
 import Sidebar from "@/components/Sidebar";
+import ProjectCard from "@/components/ProjectCard";
 import { createProject } from "@/app/actions";
 import { Plus } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -52,17 +53,15 @@ export default async function ProjectsPage() {
             {(projects || []).map((p) => {
               const m = computeAll(p.data as ProjectState);
               return (
-                <a key={p.id} href={`/projects/${p.id}`} className="project-card">
-                  <div className="project-card-type">{TYPE_LABEL[p.project_type] || p.project_type}</div>
-                  <div className="project-card-name">{p.name}</div>
-                  <div className="project-card-stats">
-                    <span>ROI <b className="mono">{fmtNum(m.roiPct)}%</b></span>
-                    <span>Score <b className="mono">{fmtNum(m.overallScore)}/10</b></span>
-                  </div>
-                  <div className="project-card-stats" style={{ marginTop: 6 }}>
-                    <span>Investment <span className="mono">{fmtINR(m.totalInvestment)}</span></span>
-                  </div>
-                </a>
+                <ProjectCard
+                  key={p.id}
+                  id={p.id}
+                  name={p.name}
+                  typeLabel={TYPE_LABEL[p.project_type] || p.project_type}
+                  roiText={fmtNum(m.roiPct) + "%"}
+                  scoreText={fmtNum(m.overallScore) + "/10"}
+                  investmentText={fmtINR(m.totalInvestment)}
+                />
               );
             })}
           </div>
