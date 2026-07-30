@@ -16,6 +16,7 @@ export interface CompanyProfile {
   author_name: string | null;
   author_bio: string | null;
   author_photo_storage_path: string | null;
+  author_background_photo_storage_path: string | null;
   updated_at: string;
 }
 

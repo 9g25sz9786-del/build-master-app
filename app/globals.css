@@ -302,11 +302,6 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .report-author-photo { width:240px; height:320px; border-radius:4px; object-fit:cover; flex-shrink:0; filter:grayscale(1) contrast(1.1) brightness(0.85); box-shadow:0 10px 30px rgba(0,0,0,0.45); }
 .report-author-name { font-family:'Poppins',sans-serif; font-weight:700; font-size:24px; margin-bottom:10px; }
 .report-author-bio { font-size:13.5px; line-height:1.85; color:#E8E4D8; white-space:pre-line; text-align:justify; }
-
-.report-author-sheet { display:flex; min-height:420px; background:#141414; break-before: page; page-break-before: always; }
-.report-author-sheet-graphic { width:38%; flex-shrink:0; }
-.report-author-sheet-text { flex:1; display:flex; align-items:center; padding:60px 50px; }
-.report-author-sheet-text .report-author-bio { font-size:14.5px; }
 @media print {
   @page { margin: 18mm 0; size: auto; }
   html, body { margin: 0 !important; padding: 0 !important; background: #FFFFFF; }

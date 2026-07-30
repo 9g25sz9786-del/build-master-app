@@ -99,89 +99,6 @@ function TopicPlaceholder() {
   );
 }
 
-// Portrait-panel construction graphics for the multi-sheet author bio pages.
-function BioGraphicCrane() {
-  return (
-    <svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-      <rect width="300" height="400" fill="#141414" />
-      <g stroke="#4a4a4a" strokeWidth="2" fill="none">
-        <line x1="90" y1="360" x2="90" y2="60" />
-        <line x1="90" y1="60" x2="220" y2="60" />
-        <line x1="90" y1="60" x2="60" y2="140" />
-        <line x1="220" y1="60" x2="220" y2="90" />
-        <line x1="60" y1="360" x2="120" y2="360" />
-      </g>
-      <g stroke="#C1272D" strokeWidth="2.5" fill="none">
-        <line x1="220" y1="90" x2="220" y2="220" />
-        <circle cx="220" cy="228" r="6" />
-      </g>
-      <g stroke="#2a2a2a" strokeWidth="1.5" fill="none">
-        <rect x="40" y="340" width="220" height="30" />
-        <line x1="70" y1="340" x2="70" y2="370" />
-        <line x1="110" y1="340" x2="110" y2="370" />
-        <line x1="150" y1="340" x2="150" y2="370" />
-        <line x1="190" y1="340" x2="190" y2="370" />
-        <line x1="230" y1="340" x2="230" y2="370" />
-      </g>
-    </svg>
-  );
-}
-function BioGraphicBlueprint() {
-  return (
-    <svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-      <rect width="300" height="400" fill="#141414" />
-      <g stroke="#3a3a3a" strokeWidth="1.5" fill="none">
-        <rect x="50" y="80" width="200" height="240" />
-        <line x1="50" y1="150" x2="250" y2="150" />
-        <line x1="50" y1="220" x2="250" y2="220" />
-        <line x1="50" y1="270" x2="250" y2="270" />
-        <line x1="120" y1="80" x2="120" y2="320" />
-        <line x1="180" y1="80" x2="180" y2="320" />
-      </g>
-      <g stroke="#C1272D" strokeWidth="2" fill="none">
-        <circle cx="150" cy="200" r="30" />
-        <line x1="150" y1="170" x2="150" y2="230" />
-        <line x1="120" y1="200" x2="180" y2="200" />
-      </g>
-    </svg>
-  );
-}
-function BioGraphicHardHat() {
-  return (
-    <svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-      <rect width="300" height="400" fill="#141414" />
-      <g stroke="#4a4a4a" strokeWidth="2" fill="none">
-        <path d="M 90 220 A 60 60 0 0 1 210 220" />
-        <line x1="80" y1="220" x2="220" y2="220" />
-        <line x1="145" y1="160" x2="145" y2="140" />
-      </g>
-      <g stroke="#C1272D" strokeWidth="2.5" fill="none">
-        <line x1="150" y1="260" x2="150" y2="330" />
-        <line x1="120" y1="290" x2="180" y2="290" />
-      </g>
-    </svg>
-  );
-}
-const BIO_GRAPHICS = [BioGraphicCrane, BioGraphicBlueprint, BioGraphicHardHat];
-
-function splitBioIntoSheets(bio: string): string[] {
-  const byBlankLine = bio.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-  if (byBlankLine.length > 1) return byBlankLine;
-
-  // No paragraph breaks — chunk long single-paragraph bios into readable sheets.
-  const sentences = bio.match(/[^.!?]+[.!?]+/g) || [bio];
-  const chunks: string[] = [];
-  let current = "";
-  sentences.forEach((s, i) => {
-    current += s;
-    if ((i + 1) % 3 === 0) {
-      chunks.push(current.trim());
-      current = "";
-    }
-  });
-  if (current.trim()) chunks.push(current.trim());
-  return chunks.length > 0 ? chunks : [bio];
-}
 
 export default async function FullReportPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -496,50 +413,31 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           </div>
         </section>
 
-        {/* About the Author — split across multiple sheets if the bio is long */}
-        {(() => {
-          const bioSheets = c?.author_bio ? splitBioIntoSheets(c.author_bio) : [];
-          const hasAuthor = c?.author_name || bioSheets.length > 0 || c?.author_photo_storage_path;
-          if (!hasAuthor) return null;
-          const firstBio = bioSheets[0] || "";
-          const restBio = bioSheets.slice(1);
-          return (
-            <>
-              <div className="report-author">
-                {c?.author_photo_storage_path ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={companyPublicUrl(c.author_photo_storage_path)} alt="" className="report-author-bg" />
-                ) : null}
-                <div className="report-author-overlay" />
-                <div className="report-author-content">
-                  <div className="report-author-text">
-                    <div className="report-author-eyebrow"><span className="report-accent-dot" /> About the Author</div>
-                    {c?.author_name && <div className="report-author-name">{c.author_name}</div>}
-                    {firstBio && <p className="report-author-bio">{firstBio}</p>}
-                  </div>
-                  {c?.author_photo_storage_path && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={companyPublicUrl(c.author_photo_storage_path)} alt={c?.author_name || ""} className="report-author-photo" />
-                  )}
-                </div>
+        {/* About the Author — one clean page: background photo blend + portrait + full bio */}
+        {(c?.author_name || c?.author_bio || c?.author_photo_storage_path) && (
+          <div className="report-author">
+            {(c?.author_background_photo_storage_path || c?.author_photo_storage_path) ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={companyPublicUrl(c.author_background_photo_storage_path || c.author_photo_storage_path!)}
+                alt=""
+                className="report-author-bg"
+              />
+            ) : null}
+            <div className="report-author-overlay" />
+            <div className="report-author-content">
+              <div className="report-author-text">
+                <div className="report-author-eyebrow"><span className="report-accent-dot" /> About the Author</div>
+                {c?.author_name && <div className="report-author-name">{c.author_name}</div>}
+                {c?.author_bio && <p className="report-author-bio">{c.author_bio}</p>}
               </div>
-
-              {restBio.map((chunk, i) => {
-                const Graphic = BIO_GRAPHICS[i % BIO_GRAPHICS.length];
-                const imageOnRight = i % 2 === 0;
-                return (
-                  <div className="report-author-sheet" key={i}>
-                    {!imageOnRight && <div className="report-author-sheet-graphic"><Graphic /></div>}
-                    <div className="report-author-sheet-text">
-                      <p className="report-author-bio">{chunk}</p>
-                    </div>
-                    {imageOnRight && <div className="report-author-sheet-graphic"><Graphic /></div>}
-                  </div>
-                );
-              })}
-            </>
-          );
-        })()}
+              {c?.author_photo_storage_path && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={companyPublicUrl(c.author_photo_storage_path)} alt={c?.author_name || ""} className="report-author-photo" />
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Closing: company contact + colophon */}
         <div className="report-final-cta">

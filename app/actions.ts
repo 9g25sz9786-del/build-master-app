@@ -94,6 +94,20 @@ export async function saveAuthorPhoto(storagePath: string) {
   revalidatePath("/company-profile");
 }
 
+export async function saveAuthorBackgroundPhoto(storagePath: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase
+    .from("company_profiles")
+    .upsert({ id: user!.id, author_background_photo_storage_path: storagePath });
+  if (error) throw new Error(error.message);
+  revalidatePath("/company-profile");
+}
+
 export async function saveCompanyProfile(formData: FormData) {
   const supabase = await createClient();
   const {

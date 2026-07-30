@@ -79,7 +79,8 @@ export default async function CompanyProfilePage() {
             </div>
 
             <div className="card-head" style={{ marginTop: 8 }}>Author</div>
-            <AuthorPhotoUpload ownerId={user.id} initialPath={c?.author_photo_storage_path || null} />
+            <AuthorPhotoUpload ownerId={user.id} initialPath={c?.author_photo_storage_path || null} kind="portrait" />
+            <AuthorPhotoUpload ownerId={user.id} initialPath={c?.author_background_photo_storage_path || null} kind="background" />
             <div className="field-grid">
               <label className="field">
                 <span className="field-label">Author Name</span>
