@@ -308,8 +308,17 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
   .no-print { display:none !important; }
   .report-topbar { display:none !important; }
   .report-cover { break-inside: avoid-page; }
-  .report-topic, .report-toc, .report-final-cta, .report-colophon, .report-author, .report-author-sheet { break-inside: avoid-page; page-break-inside: avoid; }
-  .report-section { break-inside: avoid-page; page-break-inside: avoid; }
+  .report-toc, .report-final-cta, .report-colophon, .report-author { break-inside: avoid-page; page-break-inside: avoid; }
+  /* NOTE: intentionally NOT applied to .report-section / .report-topic — these are long,
+     multi-paragraph blocks that legitimately span several pages. Marking a block that's
+     taller than one page as "avoid break inside" makes the browser shove the whole thing
+     onto a fresh page when it doesn't fit the remaining space, which is exactly what was
+     leaving large blank gaps and forcing awkward splits. Instead we protect the small,
+     genuinely atomic pieces below so *those* never get cut in half. */
+  .card, .stat-tile, .report-media-card, .report-toc-item, .report-score-row {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
   .report-doc { max-width: 100%; }
 
   /* Only genuinely full-bleed sections cancel the page margin to reach true paper edges.
