@@ -226,6 +226,7 @@ export async function upsertProjectLocation(
     );
   if (error) throw new Error(error.message);
   revalidatePath(`/location/${projectId}`);
+  revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/full-report`);
 }
 
@@ -242,6 +243,7 @@ export async function updateProjectLocationDistances(
     );
   if (error) throw new Error(error.message);
   revalidatePath(`/location/${projectId}`);
+  revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/full-report`);
 }
 

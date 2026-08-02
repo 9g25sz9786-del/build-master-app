@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Workspace from "@/components/Workspace";
+import { ProjectLocation, ProjectMedia } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -23,5 +24,28 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
   if (error || !project) notFound();
 
-  return <Workspace project={project} userEmail={user.email ?? ""} />;
+  const { data: locationRow } = await supabase
+    .from("project_location")
+    .select("*")
+    .eq("project_id", id)
+    .maybeSingle();
+
+  const { data: locationMediaRows } = await supabase
+    .from("project_media")
+    .select("*")
+    .eq("project_id", id)
+    .in("category", ["location_photo", "map_photo"])
+    .order("sort_order", { ascending: true });
+
+  const locationMedia = (locationMediaRows as ProjectMedia[]) || [];
+
+  return (
+    <Workspace
+      project={project}
+      userEmail={user.email ?? ""}
+      initialLocation={locationRow as ProjectLocation | null}
+      initialLocationPhotos={locationMedia.filter((m) => m.category === "location_photo")}
+      initialMapPhotos={locationMedia.filter((m) => m.category === "map_photo")}
+    />
+  );
 }

@@ -417,3 +417,72 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .section-layout-row input[type="checkbox"] { width:15px; height:15px; accent-color: var(--brass-deep); }
 .section-layout-unit { color:var(--slate); font-size:12px; }
 .section-layout-hint { font-size:11.5px; color:var(--slate); line-height:1.5; margin:0; }
+
+/* ============================================================================
+   MOBILE / RESPONSIVE
+   The sidebar becomes an off-canvas drawer below 860px, toggled by a plain
+   checkbox + label (no JS needed, so it works from server components too).
+   ============================================================================ */
+
+.nav-toggle-checkbox { position:absolute; opacity:0; pointer-events:none; }
+.nav-toggle-btn { display:none; }
+.nav-toggle-backdrop { display:none; }
+
+@media (max-width: 860px) {
+  .app-root { flex-direction: column; min-height: 100dvh; }
+
+  .nav-toggle-btn {
+    display:flex; flex-direction:column; justify-content:center; gap:4px;
+    position:fixed; top:14px; left:14px; z-index:60;
+    width:40px; height:40px; border-radius:10px; background:#FFFFFF;
+    border:1px solid var(--line); box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    cursor:pointer; padding:0 9px;
+  }
+  .nav-toggle-btn span { display:block; width:100%; height:2px; background:var(--ink); border-radius:2px; }
+
+  .sidebar {
+    position:fixed; inset:0 auto 0 0; width:78vw; max-width:280px; z-index:55;
+    transform:translateX(-100%); transition:transform .22s ease;
+    box-shadow:10px 0 30px rgba(0,0,0,0.18); padding-top:64px;
+  }
+  .sidebar:has(.nav-toggle-checkbox:checked) { transform:translateX(0); }
+
+  .nav-toggle-backdrop {
+    display:block; position:fixed; inset:0; background:rgba(20,18,14,0.35); z-index:50;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .app-root:has(.nav-toggle-checkbox:checked) .nav-toggle-backdrop { opacity:1; pointer-events:auto; }
+
+  .main-canvas { padding: 64px 16px 40px; max-width:100%; }
+
+  .step-header { flex-wrap:wrap; }
+  .wizard-tabs { gap:4px; padding-bottom:10px; }
+  .wizard-tab { font-size:11.5px; padding:6px 10px; }
+
+  .field-grid, .metric-grid, .stat-grid { grid-template-columns: 1fr !important; }
+  .dash-cols, .report-cols, .chart-cols { grid-template-columns: 1fr !important; }
+  .projects-grid { grid-template-columns: 1fr !important; }
+  .report-media-grid { grid-template-columns: 1fr !important; }
+
+  .quicknav { flex-wrap:wrap; }
+  .quicknav-btn { flex: 1 1 auto; justify-content:center; }
+
+  .report-topbar { flex-wrap:wrap; gap:10px; padding:12px 16px; }
+  .report-topbar > div { flex-wrap:wrap; gap:8px !important; }
+
+  .report-cover-content { padding:34px 22px; }
+  .report-cover-title { font-size:30px; }
+  .report-section { padding:0 20px; }
+  .report-toc { padding:34px 20px 14px; }
+  .report-cover-logo-row { padding:0 20px; min-height:90px; flex-wrap:wrap; }
+  .report-author-content { flex-direction:column; padding:40px 22px; text-align:center; }
+  .report-author-photo { width:180px; height:230px; }
+  .report-final-cta, .report-colophon { padding-left:22px; padding-right:22px; }
+}
+
+@media (max-width: 480px) {
+  .metric-grid, .stat-grid { grid-template-columns: 1fr !important; }
+  .hero-title { font-size:21px; }
+  .step-title { font-size:16px; }
+  .btn-primary, .btn-ghost { font-size:12.5px; padding:8px 12px; }
+}

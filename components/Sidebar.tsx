@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutGrid, GitCompare, LogOut, Image as ImageIcon, Building2, Users, BookOpen, MapPin } from "lucide-react";
+import { LayoutGrid, GitCompare, LogOut, Image as ImageIcon, Building2, Users, BookOpen } from "lucide-react";
 import { signOut } from "@/app/actions";
 
 export default function Sidebar({
@@ -15,8 +15,16 @@ export default function Sidebar({
   role?: "owner" | "designer";
 }) {
   return (
-    <aside className="sidebar">
-      <div className="sidebar-brand">
+    <>
+      <label htmlFor="nav-toggle" className="nav-toggle-btn" aria-label="Open menu">
+        <span />
+        <span />
+        <span />
+      </label>
+      <label htmlFor="nav-toggle" className="nav-toggle-backdrop" aria-hidden="true" />
+      <aside className="sidebar">
+        <input type="checkbox" id="nav-toggle" className="nav-toggle-checkbox" />
+        <div className="sidebar-brand">
         <Image src="/logo.png" alt="Build Master" width={44} height={44} className="brand-logo" />
         <div>
           <div className="brand-name">Build Master</div>
@@ -42,9 +50,6 @@ export default function Sidebar({
             <Link href="/intro" className={"nav-btn" + (active === "intro" ? " active" : "")}>
               <BookOpen size={16} strokeWidth={2} /> Project Intro
             </Link>
-            <Link href="/location" className={"nav-btn" + (active === "location" ? " active" : "")}>
-              <MapPin size={16} strokeWidth={2} /> Location
-            </Link>
             <Link href="/company-profile" className={"nav-btn" + (active === "company-profile" ? " active" : "")}>
               <Building2 size={16} strokeWidth={2} /> Company Profile
             </Link>
@@ -69,7 +74,8 @@ export default function Sidebar({
           </button>
         </form>
         <div className="footer-brand" style={{ marginTop: 10 }}>Maharaja Engineers & Contractors</div>
-      </div>
-    </aside>
+        </div>
+      </aside>
+    </>
   );
 }

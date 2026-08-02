@@ -18,6 +18,8 @@ import {
   computeAll, buildRecommendation, fmtINR, fmtNum, fmtYears, clamp, ProjectState, Metrics,
 } from "@/lib/engine";
 import { saveProject, deleteProject, signOut } from "@/app/actions";
+import LocationEditor from "@/components/LocationEditor";
+import { ProjectLocation, ProjectMedia } from "@/lib/types";
 
 /* =========================================================================================
    FIELD DEFINITIONS
@@ -319,6 +321,7 @@ function Dashboard({ state, m, go, projectId }: { state: ProjectState; m: Metric
         <div className="card-head">Quick Navigate</div>
         <div className="quicknav">
           <button className="quicknav-btn" onClick={() => go("build", 1)}><Calculator size={15} /> Edit Inputs</button>
+          <button className="quicknav-btn" onClick={() => go("build", 7)}><MapPin size={15} /> Location</button>
           <button className="quicknav-btn" onClick={() => go("results")}><BarChart3 size={15} /> Results & Score</button>
           <button className="quicknav-btn" onClick={() => go("report")}><ScrollText size={15} /> AI Report</button>
           <button className="quicknav-btn" onClick={() => go("charts")}><BarChart3 size={15} /> Charts</button>
@@ -493,6 +496,20 @@ function StepOpex({ state, dispatch, m }: { state: ProjectState; dispatch: any; 
   );
 }
 
+function StepLocation({ location }: { location: { projectId: string; initialLocation: ProjectLocation | null; initialLocationPhotos: ProjectMedia[]; initialMapPhotos: ProjectMedia[] } }) {
+  return (
+    <div className="view">
+      <StepHeader n={7} title="Location" subtitle="Describe the site, add a map screenshot and photos, and list distances to key places — this becomes the report's Location section." />
+      <LocationEditor
+        projectId={location.projectId}
+        initialLocation={location.initialLocation}
+        initialLocationPhotos={location.initialLocationPhotos}
+        initialMapPhotos={location.initialMapPhotos}
+      />
+    </div>
+  );
+}
+
 const STEPS = [
   { n: 1, title: "Project Details", Comp: StepProject },
   { n: 2, title: "Land Cost", Comp: StepLand },
@@ -500,9 +517,16 @@ const STEPS = [
   { n: 4, title: "Finance", Comp: StepFinance },
   { n: 5, title: "Revenue Model", Comp: StepRevenue },
   { n: 6, title: "Operating Expenses", Comp: StepOpex },
+  { n: 7, title: "Location", Comp: StepLocation },
 ];
+const LAST_STEP = STEPS[STEPS.length - 1].n;
 
-function Wizard({ state, dispatch, m, step, setStep }: { state: ProjectState; dispatch: any; m: Metrics; step: number; setStep: (n: number) => void }) {
+function Wizard({
+  state, dispatch, m, step, setStep, location,
+}: {
+  state: ProjectState; dispatch: any; m: Metrics; step: number; setStep: (n: number) => void;
+  location: { projectId: string; initialLocation: ProjectLocation | null; initialLocationPhotos: ProjectMedia[]; initialMapPhotos: ProjectMedia[] };
+}) {
   const current = STEPS.find((s) => s.n === step) || STEPS[0];
   const Comp = current.Comp as any;
   return (
@@ -514,10 +538,10 @@ function Wizard({ state, dispatch, m, step, setStep }: { state: ProjectState; di
           </button>
         ))}
       </div>
-      <Comp state={state} dispatch={dispatch} m={m} />
+      <Comp state={state} dispatch={dispatch} m={m} location={location} />
       <div className="wizard-nav">
         <button className="btn-ghost" disabled={step === 1} onClick={() => setStep(Math.max(1, step - 1))}><ArrowLeft size={15} /> Back</button>
-        <button className="btn-primary" disabled={step === 6} onClick={() => setStep(Math.min(6, step + 1))}>Next <ArrowRight size={15} /></button>
+        <button className="btn-primary" disabled={step === LAST_STEP} onClick={() => setStep(Math.min(LAST_STEP, step + 1))}>Next <ArrowRight size={15} /></button>
       </div>
     </div>
   );
@@ -748,7 +772,21 @@ const NAV = [
   { key: "charts", label: "Charts", icon: PiggyBank },
 ];
 
-export default function Workspace({ project, userEmail }: { project: { id: string; name: string; project_type: string; data: ProjectState; updated_at: string }; userEmail: string }) {
+export default function Workspace({
+  project, userEmail, initialLocation, initialLocationPhotos, initialMapPhotos,
+}: {
+  project: { id: string; name: string; project_type: string; data: ProjectState; updated_at: string };
+  userEmail: string;
+  initialLocation?: ProjectLocation | null;
+  initialLocationPhotos?: ProjectMedia[];
+  initialMapPhotos?: ProjectMedia[];
+}) {
+  const location = {
+    projectId: project.id,
+    initialLocation: initialLocation ?? null,
+    initialLocationPhotos: initialLocationPhotos ?? [],
+    initialMapPhotos: initialMapPhotos ?? [],
+  };
   const [state, dispatch] = useReducer(reducer, project.data);
   const [section, setSection] = useState("dashboard");
   const [step, setStep] = useState(1);
@@ -801,7 +839,12 @@ export default function Workspace({ project, userEmail }: { project: { id: strin
 
   return (
     <div className="app-root">
+      <label htmlFor="nav-toggle" className="nav-toggle-btn" aria-label="Open menu">
+        <span /><span /><span />
+      </label>
+      <label htmlFor="nav-toggle" className="nav-toggle-backdrop" aria-hidden="true" />
       <aside className="sidebar">
+        <input type="checkbox" id="nav-toggle" className="nav-toggle-checkbox" />
         <Link href="/projects" className="nav-btn" style={{ marginBottom: 10 }}>
           <ArrowLeftCircle size={16} /> All Projects
         </Link>
@@ -842,7 +885,7 @@ export default function Workspace({ project, userEmail }: { project: { id: strin
         </div>
 
         {section === "dashboard" && <Dashboard state={state} m={m} go={go} projectId={project.id} />}
-        {section === "build" && <Wizard state={state} dispatch={dispatch} m={m} step={step} setStep={setStep} />}
+        {section === "build" && <Wizard state={state} dispatch={dispatch} m={m} step={step} setStep={setStep} location={location} />}
         {section === "results" && <Results m={m} adj={adj} setAdj={setAdj} mAdj={mAdj} />}
         {section === "report" && <Report m={m} rec={rec} state={state} projectId={project.id} />}
         {section === "charts" && <Charts m={m} scenarios={scenarios} />}
