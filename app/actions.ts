@@ -196,7 +196,9 @@ export async function addProjectMedia(
   });
   if (error) throw new Error(error.message);
   revalidatePath(`/media/${projectId}`);
+  revalidatePath(`/location/${projectId}`);
   revalidatePath(`/projects/${projectId}`);
+  revalidatePath(`/projects/${projectId}/full-report`);
 }
 
 export async function deleteProjectMedia(id: string, projectId: string) {
@@ -204,7 +206,43 @@ export async function deleteProjectMedia(id: string, projectId: string) {
   const { error } = await supabase.from("project_media").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath(`/media/${projectId}`);
+  revalidatePath(`/location/${projectId}`);
   revalidatePath(`/projects/${projectId}`);
+  revalidatePath(`/projects/${projectId}/full-report`);
+}
+
+/* ─────────────────────────────── Project Location ─────────────────────────────── */
+
+export async function upsertProjectLocation(
+  projectId: string,
+  fields: { description?: string; latitude?: number | null; longitude?: number | null }
+) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("project_location")
+    .upsert(
+      { project_id: projectId, ...fields, updated_at: new Date().toISOString() },
+      { onConflict: "project_id" }
+    );
+  if (error) throw new Error(error.message);
+  revalidatePath(`/location/${projectId}`);
+  revalidatePath(`/projects/${projectId}/full-report`);
+}
+
+export async function updateProjectLocationDistances(
+  projectId: string,
+  distances: { place: string; distance: string }[]
+) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("project_location")
+    .upsert(
+      { project_id: projectId, distances, updated_at: new Date().toISOString() },
+      { onConflict: "project_id" }
+    );
+  if (error) throw new Error(error.message);
+  revalidatePath(`/location/${projectId}`);
+  revalidatePath(`/projects/${projectId}/full-report`);
 }
 
 /* ─────────────────────────────── Project Intro Sections ─────────────────────────────── */

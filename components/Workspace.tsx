@@ -141,6 +141,51 @@ function TextField({ label, value, onChange, type = "text" }: { label: string; v
     </label>
   );
 }
+function TagListField({ label, hint, value, onChange }: { label: string; hint?: string; value: string[]; onChange: (v: string[]) => void }) {
+  const [draft, setDraft] = useState("");
+  function add() {
+    const v = draft.trim();
+    if (!v) return;
+    onChange([...(value || []), v]);
+    setDraft("");
+  }
+  function remove(i: number) {
+    onChange((value || []).filter((_, idx) => idx !== i));
+  }
+  return (
+    <label className="field" style={{ gridColumn: "1 / -1" }}>
+      <span className="field-label">{label}</span>
+      {hint && <span className="note" style={{ marginBottom: 6, display: "block" }}>{hint}</span>}
+      <div style={{ display: "flex", gap: 8, marginBottom: (value || []).length > 0 ? 10 : 0 }}>
+        <input
+          className="field-input"
+          style={{ paddingLeft: 12, flex: 1 }}
+          value={draft}
+          placeholder="Type an amenity and press Enter — e.g. Swimming Pool"
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              add();
+            }
+          }}
+        />
+        <button className="btn-ghost" type="button" onClick={add}>Add</button>
+      </div>
+      {(value || []).length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {(value || []).map((tag, i) => (
+            <span key={i} className="amenity-tag">
+              {tag}
+              <button type="button" onClick={() => remove(i)} aria-label={`Remove ${tag}`}>×</button>
+            </span>
+          ))}
+        </div>
+      )}
+    </label>
+  );
+}
+
 function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { id: string; label: string }[] }) {
   return (
     <label className="field">
@@ -302,6 +347,12 @@ function StepProject({ state, dispatch }: { state: ProjectState; dispatch: any }
           <SelectField label="Land Unit" value={state.project.landUnit} options={[{ id: "cent", label: "Cent" }, { id: "sqft", label: "Square feet" }, { id: "sqm", label: "Square metre" }, { id: "acre", label: "Acre" }]} onChange={(v) => dispatch({ type: "SET", section: "project", key: "landUnit", value: v })} />
           <NumField label="Project Duration" suffix="mo" value={state.project.durationMonths} onChange={(v) => dispatch({ type: "SET", section: "project", key: "durationMonths", value: v })} />
           <TextField label="Expected Completion Date" type="date" value={state.project.completionDate} onChange={(v) => dispatch({ type: "SET", section: "project", key: "completionDate", value: v })} />
+          <TagListField
+            label="Amenities"
+            hint="Listed in the report's Feasibility section."
+            value={state.project.amenities || []}
+            onChange={(v) => dispatch({ type: "SET", section: "project", key: "amenities", value: v })}
+          />
         </div>
       </div>
     </div>

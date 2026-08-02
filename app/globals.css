@@ -91,6 +91,10 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .field-prefix { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--slate); font-size:13px; font-family:'IBM Plex Mono',monospace; }
 .field-suffix { position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--slate); font-size:11.5px; }
 
+.amenity-tag { display:inline-flex; align-items:center; gap:6px; padding:5px 10px 5px 12px; border-radius:16px; background:#FAF9F5; border:1px solid var(--line); font-size:12.5px; color:var(--ink); }
+.amenity-tag button { border:none; background:none; color:var(--slate); font-size:15px; line-height:1; cursor:pointer; padding:0 2px; }
+.amenity-tag button:hover { color: var(--rust); }
+
 .summary-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px dashed var(--line); font-size:13px; }
 .summary-row:last-child { border-bottom:none; }
 .summary-row-strong { font-weight:700; color: var(--brass-deep); border-top:1.5px solid var(--ink); padding-top:10px; margin-top:2px; }
@@ -271,6 +275,18 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .report-media-card img { width:100%; height:220px; object-fit:cover; border-radius:2px; border:1px solid var(--r-line); filter:grayscale(1) contrast(1.05); }
 .report-media-caption { font-size:12px; color:var(--r-gray); margin-top:8px; }
 .report-media-title { font-size:13px; font-weight:600; margin-top:10px; }
+
+.report-distance-list { display:flex; flex-direction:column; }
+.report-distance-row { display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px dashed var(--r-line); font-size:13px; }
+.report-distance-row:last-child { border-bottom:none; }
+
+.report-charge-list { display:flex; flex-direction:column; }
+.report-charge-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--r-line); font-size:13px; }
+.report-charge-row:last-child { border-bottom:none; }
+.report-charge-total { font-weight:700; border-top:1.5px solid var(--r-ink, #141414); border-bottom:none; padding-top:12px; margin-top:2px; }
+
+.report-amenity-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+.report-amenity-chip { display:inline-flex; align-items:center; padding:6px 14px; border-radius:16px; background:#F5F3EC; border:1px solid var(--r-line); font-size:12.5px; color:var(--r-ink, #141414); }
 
 .report-final-cta { background:var(--r-ink); color:#fff; padding:60px 44px; text-align:center; margin-top:10px; }
 .report-final-cta h3 { font-family:'Poppins',sans-serif; font-size:22px; margin:0 0 10px; }

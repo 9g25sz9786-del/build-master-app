@@ -4,7 +4,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftCircle } from "lucide-react";
 import { computeAll, buildRecommendation, fmtINR, fmtNum, fmtYears, ProjectState } from "@/lib/engine";
-import { CompanyProfile, ProjectMedia, ProjectIntroSection } from "@/lib/types";
+import { CompanyProfile, ProjectMedia, ProjectIntroSection, ProjectLocation } from "@/lib/types";
 import PrintButton from "@/components/PrintButton";
 import PagedPreviewButton from "@/components/PagedPreviewButton";
 import DownloadPdfButton from "@/components/DownloadPdfButton";
@@ -137,6 +137,13 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
     .eq("project_id", id)
     .order("sort_order", { ascending: true });
 
+  const { data: locationRow } = await supabase
+    .from("project_location")
+    .select("*")
+    .eq("project_id", id)
+    .maybeSingle();
+  const projectLocation = locationRow as ProjectLocation | null;
+
   const media = (mediaRows as ProjectMedia[]) || [];
   const publicUrl = (path: string) =>
     supabase.storage.from("project-media").getPublicUrl(path).data.publicUrl;
@@ -148,23 +155,40 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
   const rec = buildRecommendation(m);
   const c = company as CompanyProfile | null;
 
-  const coverImage = media.find((x) => x.category === "render") || media[0];
+  const galleryMedia = media.filter((x) => ["render", "plan", "site_photo", "other"].includes(x.category));
+  const coverImage = galleryMedia.find((x) => x.category === "render") || galleryMedia[0];
   const renders = media.filter((x) => x.category === "render");
   const plans = media.filter((x) => x.category === "plan");
   const sitePhotos = media.filter((x) => x.category === "site_photo" || x.category === "other");
+  const locationPhotos = media.filter((x) => x.category === "location_photo");
+  const mapPhotos = media.filter((x) => x.category === "map_photo");
+  const hasGalleryMedia = renders.length > 0 || plans.length > 0 || sitePhotos.length > 0;
+  const hasLocationContent = !!(
+    projectLocation?.description ||
+    projectLocation?.latitude != null ||
+    locationPhotos.length > 0 ||
+    mapPhotos.length > 0 ||
+    (projectLocation?.distances?.length || 0) > 0
+  );
 
   const today = new Date().toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" });
   const companyName = c?.company_name || "Maharaja Engineers & Contractors";
 
   const hasAuthorContent = !!(c?.author_name || c?.author_bio || c?.author_photo_storage_path);
-  const conclusionNum = media.length > 0 ? 4 : 3;
-  const TOC = [
-    { n: "01", label: "Project Introduction" },
-    { n: "02", label: "Project Feasibility Analysis" },
-    ...(media.length > 0 ? [{ n: "03", label: "Renderings, Plans & Site Photos" }] : []),
-    { n: String(conclusionNum).padStart(2, "0"), label: "Conclusion & Recommendation" },
-    ...(hasAuthorContent ? [{ n: String(conclusionNum + 1).padStart(2, "0"), label: "About the Author" }] : []),
+  const sectionList = [
+    { key: "intro", label: "Project Introduction" },
+    ...(hasLocationContent ? [{ key: "location", label: "Location" }] : []),
+    { key: "feasibility", label: "Project Feasibility Analysis" },
+    ...(hasGalleryMedia ? [{ key: "media", label: "Renderings, Plans & Site Photos" }] : []),
+    { key: "conclusion", label: "Conclusion & Recommendation" },
+    ...(hasAuthorContent ? [{ key: "author", label: "About the Author" }] : []),
   ];
+  const sectionNum: Record<string, string> = {};
+  sectionList.forEach((s, i) => (sectionNum[s.key] = String(i + 1).padStart(2, "0")));
+  const TOC = sectionList.map((s) => ({ n: sectionNum[s.key], label: s.label }));
+
+  const roomCountLabel = state.project.type === "hostel" ? "Number of Rooms" : state.project.type === "apartment" ? "Number of Apartments" : null;
+  const roomCountValue = state.project.type === "hostel" ? m.rooms : state.project.type === "apartment" ? state.revenue.apartment.units : null;
 
   return (
     <div className="report-page">
@@ -229,7 +253,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
 
         {/* 1. Project Introduction */}
         <section className="report-section">
-          <h2 className="report-section-title"><span className="report-section-num">01</span> Project Introduction</h2>
+          <h2 className="report-section-title"><span className="report-section-num">{sectionNum.intro}</span> Project Introduction</h2>
 
           {introSections.length === 0 ? (
             <p className="report-prose">
@@ -276,9 +300,67 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           )}
         </section>
 
-        {/* 2. Project Feasibility */}
+        {/* Location */}
+        {hasLocationContent && (
+          <section className="report-section">
+            <h2 className="report-section-title"><span className="report-section-num">{sectionNum.location}</span> Location</h2>
+
+            {projectLocation?.description && (
+              <p className="report-prose" style={{ marginBottom: 20 }}>{projectLocation.description}</p>
+            )}
+
+            {locationPhotos.length > 0 && (
+              <>
+                <h3 style={{ fontFamily: "Poppins,sans-serif", fontSize: 15, marginBottom: 4 }}>Pictures of the Place</h3>
+                <div className="report-media-grid">
+                  {locationPhotos.map((p) => (
+                    <div className="report-media-card" key={p.id}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={publicUrl(p.storage_path)} alt={p.title} />
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {(projectLocation?.latitude != null || mapPhotos.length > 0) && (
+              <div className="card" style={{ marginTop: 20 }}>
+                <div className="card-head">Google Map</div>
+                {projectLocation?.latitude != null && projectLocation?.longitude != null && (
+                  <p className="report-prose" style={{ fontSize: 13, marginBottom: mapPhotos.length > 0 ? 14 : 0 }}>
+                    Coordinates: <span className="mono">{projectLocation.latitude}, {projectLocation.longitude}</span>
+                  </p>
+                )}
+                {mapPhotos.length > 0 && (
+                  <div className="report-media-grid">
+                    {mapPhotos.map((p) => (
+                      <div className="report-media-card" key={p.id}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={publicUrl(p.storage_path)} alt="Map" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {projectLocation?.distances && projectLocation.distances.length > 0 && (
+              <div className="card" style={{ marginTop: 20 }}>
+                <div className="card-head">Distance to Key Places</div>
+                <div className="report-distance-list">
+                  {projectLocation.distances.map((d, i) => (
+                    <div className="report-distance-row" key={i}>
+                      <span>{d.place || "—"}</span>
+                      <span className="mono">{d.distance || "—"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
         <section className="report-section">
-          <h2 className="report-section-title"><span className="report-section-num">02</span> Project Feasibility Analysis</h2>
+          <h2 className="report-section-title"><span className="report-section-num">{sectionNum.feasibility}</span> Project Feasibility Analysis</h2>
 
           <div className="card" style={{ marginBottom: 16 }}>
             <div className="card-head">Project Details</div>
@@ -289,6 +371,36 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
               <div className="stat-tile"><div className="stat-label">Duration</div><div className="stat-value mono">{state.project.durationMonths} mo</div></div>
             </div>
           </div>
+
+          <div className="card" style={{ marginBottom: 16 }}>
+            <div className="card-head">Building & Construction</div>
+            <div className="metric-grid">
+              <div className="stat-tile"><div className="stat-label">Built-up Area</div><div className="stat-value mono">{fmtNum(m.builtUpArea, 0)} sqft</div></div>
+              <div className="stat-tile"><div className="stat-label">Construction Cost / Sqft</div><div className="stat-value mono">{fmtINR(state.construction.costPerSqft)}</div></div>
+              {roomCountLabel && roomCountValue != null && (
+                <div className="stat-tile"><div className="stat-label">{roomCountLabel}</div><div className="stat-value mono">{roomCountValue}</div></div>
+              )}
+            </div>
+            <div className="report-charge-list" style={{ marginTop: 16 }}>
+              <div className="report-charge-row"><span>Base Construction Cost</span><span className="mono">{fmtINR(m.baseConstruction)}</span></div>
+              <div className="report-charge-row"><span>Professional Fees (Architect, Structural, MEP, Interior)</span><span className="mono">{fmtINR(m.professionalFees)}</span></div>
+              <div className="report-charge-row"><span>Government & Approval Fees</span><span className="mono">{fmtINR(m.govApprovalCost)}</span></div>
+              <div className="report-charge-row"><span>Infrastructure (Electrical, Water, Lift, Security, etc.)</span><span className="mono">{fmtINR(m.infraCost)}</span></div>
+              <div className="report-charge-row"><span>Contingency</span><span className="mono">{fmtINR(m.contingency)}</span></div>
+              <div className="report-charge-row report-charge-total"><span>Total Construction Cost</span><span className="mono">{fmtINR(m.totalConstructionCost)}</span></div>
+            </div>
+          </div>
+
+          {state.project.amenities && state.project.amenities.length > 0 && (
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div className="card-head">Amenities</div>
+              <div className="report-amenity-list">
+                {state.project.amenities.map((a, i) => (
+                  <span className="report-amenity-chip" key={i}>{a}</span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="card" style={{ marginBottom: 16 }}>
             <div className="card-head">Cost, Revenue & Profitability</div>
@@ -354,9 +466,9 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
         </section>
 
         {/* 3. Renderings & Plans */}
-        {media.length > 0 && (
+        {hasGalleryMedia && (
           <section className="report-section">
-            <h2 className="report-section-title"><span className="report-section-num">03</span> Renderings, Plans & Site Photos</h2>
+            <h2 className="report-section-title"><span className="report-section-num">{sectionNum.media}</span> Renderings, Plans & Site Photos</h2>
             {renders.length > 0 && (
               <>
                 <h3 style={{ fontFamily: "Poppins,sans-serif", fontSize: 15, marginBottom: 4 }}>3D Renders</h3>
@@ -407,7 +519,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
 
         {/* 4. Conclusion */}
         <section className="report-section">
-          <h2 className="report-section-title"><span className="report-section-num">{media.length > 0 ? "04" : "03"}</span> Conclusion & Recommendation</h2>
+          <h2 className="report-section-title"><span className="report-section-num">{sectionNum.conclusion}</span> Conclusion & Recommendation</h2>
           <p className="report-prose" style={{ marginBottom: 18 }}>{rec.verdict}</p>
 
           <div className="report-cols" style={{ marginBottom: 16 }}>

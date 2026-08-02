@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { Upload, Trash2, ArrowLeftCircle, Image as ImageIcon, FileText, Camera, MoreHorizontal } from "lucide-react";
+import { Upload, Trash2, ArrowLeftCircle, Image as ImageIcon, FileText, Camera, MoreHorizontal, MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { addProjectMedia, deleteProjectMedia } from "@/app/actions";
 import { ProjectMedia, MediaCategory, MEDIA_CATEGORY_LABEL } from "@/lib/types";
@@ -12,6 +12,8 @@ const CATEGORY_ICON: Record<MediaCategory, any> = {
   plan: FileText,
   site_photo: Camera,
   other: MoreHorizontal,
+  location_photo: MapPin,
+  map_photo: MapPin,
 };
 const CATEGORIES: MediaCategory[] = ["render", "plan", "site_photo", "other"];
 

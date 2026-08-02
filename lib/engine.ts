@@ -6,7 +6,7 @@ export type ProjectType = "hostel" | "apartment" | "commercial";
 export interface ProjectState {
   project: {
     name: string; location: string; type: ProjectType; landArea: number; landUnit: string;
-    durationMonths: number; completionDate: string; developerName: string;
+    durationMonths: number; completionDate: string; developerName: string; amenities: string[];
   };
   land: { costPerCent: number; registrationPct: number; stampDutyPct: number; legalCharges: number; brokeragePct: number; misc: number };
   construction: Record<string, number>;
@@ -318,7 +318,7 @@ export function computeAll(s: ProjectState, adj: Adjustment = { occDelta: 0, cos
     totalInvestment, roiPct, returnOnEquity, loanToEquity, loanToProjectCost, dscr,
     profitMargin, operatingMargin, netMargin, paybackYears, breakEvenPeriod,
     rentalYield, capRate, profitPerSqft, constructionCostPerBed, revenuePerBed, revenuePerSqft,
-    investmentPerRoom, investmentPerBed,
+    investmentPerRoom, investmentPerBed, builtUpArea,
     irr, npv, cashOnCashReturn, exitValue, holdYears,
     cashFlowSeries, loanSeries, costBreakdown,
     overallScore, scoreLabel, riskLevel, bankable, investorFit, maxSafeLoan, hasLoan, assetSecurity,
@@ -375,7 +375,7 @@ export function buildRecommendation(m: Metrics) {
 }
 
 export const DEFAULT_STATE: ProjectState = {
-  project: { name: "Sunrise Business Hostel", location: "Kochi, Kerala", type: "hostel", landArea: 20, landUnit: "cent", durationMonths: 18, completionDate: "2027-12-31", developerName: "Maharaja Engineers & Contractors" },
+  project: { name: "Sunrise Business Hostel", location: "Kochi, Kerala", type: "hostel", landArea: 20, landUnit: "cent", durationMonths: 18, completionDate: "2027-12-31", developerName: "Maharaja Engineers & Contractors", amenities: ["Power Backup", "24/7 Security", "Lift", "Parking"] },
   land: { costPerCent: 800000, registrationPct: 8, stampDutyPct: 1, legalCharges: 50000, brokeragePct: 1, misc: 20000 },
   construction: {
     builtUpArea: 25000, costPerSqft: 2200, architectPct: 3, structuralPct: 1, mepPct: 1.5, interiorPct: 2,

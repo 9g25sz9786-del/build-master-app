@@ -20,7 +20,7 @@ export interface CompanyProfile {
   updated_at: string;
 }
 
-export type MediaCategory = "render" | "plan" | "site_photo" | "other";
+export type MediaCategory = "render" | "plan" | "site_photo" | "other" | "location_photo" | "map_photo";
 
 export interface ProjectMedia {
   id: string;
@@ -63,6 +63,22 @@ export interface ProjectIntroSection {
   extra_margin_bottom_mm: number;
 }
 
+export interface LocationDistance {
+  place: string;
+  distance: string;
+}
+
+export interface ProjectLocation {
+  id: string;
+  project_id: string;
+  description: string;
+  latitude: number | null;
+  longitude: number | null;
+  distances: LocationDistance[];
+  created_at: string;
+  updated_at: string;
+}
+
 export interface TeamMember {
   id: string;
   owner_id: string;
@@ -78,6 +94,8 @@ export const MEDIA_CATEGORY_LABEL: Record<MediaCategory, string> = {
   plan: "Plan / Drawing",
   site_photo: "Site Photo",
   other: "Other",
+  location_photo: "Location Photo",
+  map_photo: "Map Screenshot",
 };
 
 export function mediaPublicUrl(supabaseUrl: string, storagePath: string) {
