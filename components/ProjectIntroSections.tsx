@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Plus, Trash2, Upload, GripVertical } from "lucide-react";
+import { Plus, Trash2, Upload, GripVertical, LayoutTemplate } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
   createProjectIntroSection,
   updateProjectIntroSection,
+  updateProjectIntroSectionLayout,
   deleteProjectIntroSection,
   addIntroSectionPhoto,
   removeIntroSectionPhoto,
@@ -21,6 +22,12 @@ function SectionCard({ section, projectId, onDeleted }: { section: ProjectIntroS
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [showLayout, setShowLayout] = useState(false);
+  const [pageBreak, setPageBreak] = useState(!!section.force_page_break_before);
+  const [marginTop, setMarginTop] = useState(section.extra_margin_top_mm ?? 0);
+  const [marginBottom, setMarginBottom] = useState(section.extra_margin_bottom_mm ?? 0);
+  const [layoutSaving, setLayoutSaving] = useState<"idle" | "saving" | "saved">("idle");
+
   async function saveText() {
     setSaving("saving");
     try {
@@ -29,6 +36,22 @@ function SectionCard({ section, projectId, onDeleted }: { section: ProjectIntroS
       setTimeout(() => setSaving("idle"), 1500);
     } catch {
       setSaving("idle");
+    }
+  }
+
+  async function saveLayout(next: { pageBreak?: boolean; marginTop?: number; marginBottom?: number }) {
+    const merged = {
+      force_page_break_before: next.pageBreak ?? pageBreak,
+      extra_margin_top_mm: next.marginTop ?? marginTop,
+      extra_margin_bottom_mm: next.marginBottom ?? marginBottom,
+    };
+    setLayoutSaving("saving");
+    try {
+      await updateProjectIntroSectionLayout(section.id, merged, projectId);
+      setLayoutSaving("saved");
+      setTimeout(() => setLayoutSaving("idle"), 1200);
+    } catch {
+      setLayoutSaving("idle");
     }
   }
 
@@ -117,7 +140,66 @@ function SectionCard({ section, projectId, onDeleted }: { section: ProjectIntroS
         <button className="btn-ghost" type="button" onClick={handleAddPhoto} disabled={uploading}>
           <Upload size={14} /> {uploading ? "Uploading…" : "Add Photo"}
         </button>
+        <button className="btn-ghost" type="button" onClick={() => setShowLayout((v) => !v)} style={{ marginLeft: "auto" }}>
+          <LayoutTemplate size={14} /> Adjust Layout
+        </button>
       </div>
+
+      {showLayout && (
+        <div className="section-layout-panel">
+          <label className="section-layout-row">
+            <input
+              type="checkbox"
+              checked={pageBreak}
+              onChange={(e) => {
+                setPageBreak(e.target.checked);
+                saveLayout({ pageBreak: e.target.checked });
+              }}
+            />
+            Start this section on a fresh page
+          </label>
+
+          <div className="section-layout-row">
+            <span>Nudge space above</span>
+            <input
+              type="number"
+              className="field-input"
+              style={{ width: 90, paddingLeft: 10 }}
+              value={marginTop}
+              min={-60}
+              max={120}
+              onChange={(e) => setMarginTop(Number(e.target.value))}
+              onBlur={() => saveLayout({ marginTop })}
+            />
+            <span className="section-layout-unit">mm</span>
+          </div>
+
+          <div className="section-layout-row">
+            <span>Nudge space below</span>
+            <input
+              type="number"
+              className="field-input"
+              style={{ width: 90, paddingLeft: 10 }}
+              value={marginBottom}
+              min={-60}
+              max={120}
+              onChange={(e) => setMarginBottom(Number(e.target.value))}
+              onBlur={() => saveLayout({ marginBottom })}
+            />
+            <span className="section-layout-unit">mm</span>
+          </div>
+
+          <p className="section-layout-hint">
+            Negative values pull content closer together, positive values add breathing room. Changes apply to the
+            printable report and the pagination preview — not this editing screen.
+          </p>
+          {layoutSaving !== "idle" && (
+            <span className={"save-badge " + (layoutSaving === "saving" ? "saving" : "saved")}>
+              {layoutSaving === "saving" ? "Saving…" : "Saved"}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

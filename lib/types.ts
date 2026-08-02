@@ -57,6 +57,10 @@ export interface ProjectIntroSection {
   photos: SectionPhoto[];
   sort_order: number;
   created_at: string;
+  /** Manual print-layout overrides — set from the "Adjust Layout" controls on the Project Intro page. */
+  force_page_break_before: boolean;
+  extra_margin_top_mm: number;
+  extra_margin_bottom_mm: number;
 }
 
 export interface TeamMember {

@@ -233,6 +233,27 @@ export async function updateProjectIntroSection(id: string, title: string, body:
   revalidatePath(`/intro/${projectId}`);
 }
 
+/** Manual print-layout controls: force a page break before this section, and nudge its top/bottom spacing. */
+export async function updateProjectIntroSectionLayout(
+  id: string,
+  layout: { force_page_break_before: boolean; extra_margin_top_mm: number; extra_margin_bottom_mm: number },
+  projectId: string
+) {
+  const supabase = await createClient();
+  const clamp = (n: number) => Math.max(-60, Math.min(120, Math.round(n || 0)));
+  const { error } = await supabase
+    .from("project_intro_sections")
+    .update({
+      force_page_break_before: !!layout.force_page_break_before,
+      extra_margin_top_mm: clamp(layout.extra_margin_top_mm),
+      extra_margin_bottom_mm: clamp(layout.extra_margin_bottom_mm),
+    })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/intro/${projectId}`);
+  revalidatePath(`/projects/${projectId}/full-report`);
+}
+
 export async function deleteProjectIntroSection(id: string, projectId: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("project_intro_sections").delete().eq("id", id);

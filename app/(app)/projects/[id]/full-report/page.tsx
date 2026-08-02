@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
@@ -6,6 +7,7 @@ import { computeAll, buildRecommendation, fmtINR, fmtNum, fmtYears, ProjectState
 import { CompanyProfile, ProjectMedia, ProjectIntroSection } from "@/lib/types";
 import PrintButton from "@/components/PrintButton";
 import PagedPreviewButton from "@/components/PagedPreviewButton";
+import DownloadPdfButton from "@/components/DownloadPdfButton";
 import ReportCharts from "@/components/ReportCharts";
 
 export const dynamic = "force-dynamic";
@@ -171,6 +173,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
         <div style={{ display: "flex", gap: 10 }}>
           <PagedPreviewButton />
           <PrintButton />
+          <DownloadPdfButton projectId={id} />
         </div>
       </div>
 
@@ -234,8 +237,17 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
               this project's <b>Project Intro</b> page — they'll appear here automatically, in order, laid out exactly like this.
             </p>
           ) : (
-            introSections.map((s) => (
-              <div key={s.id} className="report-topic">
+            introSections.map((s) => {
+              const layoutStyle: CSSProperties = {};
+              if (s.force_page_break_before) {
+                layoutStyle.breakBefore = "page";
+                (layoutStyle as any).pageBreakBefore = "always";
+              }
+              if (s.extra_margin_top_mm) layoutStyle.marginTop = `${s.extra_margin_top_mm}mm`;
+              if (s.extra_margin_bottom_mm) layoutStyle.marginBottom = `${s.extra_margin_bottom_mm}mm`;
+
+              return (
+              <div key={s.id} className="report-topic" style={layoutStyle}>
                 <div className="report-topic-heading-row">
                   <span className="report-accent-dot" />
                   <h3 className="report-topic-title">{s.title}</h3>
@@ -259,7 +271,8 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
                 )}
                 <p className="report-prose">{s.body}</p>
               </div>
-            ))
+              );
+            })
           )}
         </section>
 
