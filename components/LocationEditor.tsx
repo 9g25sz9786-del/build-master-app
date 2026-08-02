@@ -31,6 +31,7 @@ function PhotoUploader({
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
 
   function publicUrl(path: string) {
     return supabase.storage.from("project-media").getPublicUrl(path).data.publicUrl;
@@ -38,8 +39,12 @@ function PhotoUploader({
 
   async function handleUpload() {
     const file = fileRef.current?.files?.[0];
-    if (!file) return;
+    if (!file) {
+      setStatus("No file selected — choose a photo first.");
+      return;
+    }
     setUploading(true);
+    setStatus(null);
     try {
       const ext = file.name.split(".").pop();
       const path = `${projectId}/${category}-${Date.now()}.${ext}`;
@@ -58,8 +63,11 @@ function PhotoUploader({
         created_at: new Date().toISOString(),
       });
       if (fileRef.current) fileRef.current.value = "";
+      setStatus("Photo added.");
+      setTimeout(() => setStatus(null), 2500);
     } catch (err: any) {
-      alert(err?.message || "Upload failed.");
+      console.error("Location photo upload failed:", err);
+      setStatus(err?.message || "Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -72,7 +80,7 @@ function PhotoUploader({
       await deleteProjectMedia(m.id, projectId);
       onDeleted(m.id);
     } catch (err: any) {
-      alert(err?.message || "Could not delete.");
+      setStatus(err?.message || "Could not delete.");
     }
   }
 
@@ -80,11 +88,21 @@ function PhotoUploader({
     <div className="card">
       <div className="card-head">{label}</div>
       <p className="note" style={{ marginBottom: 12 }}>{hint}</p>
-      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: photos.length > 0 ? 14 : 0 }}>
-        <input ref={fileRef} type="file" accept="image/*" className="field-input" style={{ paddingLeft: 12, paddingTop: 7, maxWidth: 260 }} />
+      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: photos.length > 0 ? 14 : 0, flexWrap: "wrap" }}>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="field-input"
+          style={{ paddingLeft: 12, paddingTop: 7, maxWidth: 260 }}
+          onChange={handleUpload}
+        />
         <button className="btn-ghost" type="button" onClick={handleUpload} disabled={uploading}>
           <Upload size={14} /> {uploading ? "Uploading…" : "Add Photo"}
         </button>
+        {status && (
+          <span style={{ fontSize: 12.5, color: status.includes("added") ? "var(--green)" : "var(--rust)" }}>{status}</span>
+        )}
       </div>
       {photos.length > 0 && (
         <div className="media-grid">
