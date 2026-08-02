@@ -373,6 +373,23 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           </div>
 
           <div className="card" style={{ marginBottom: 16 }}>
+            <div className="card-head">Land Acquisition</div>
+            <div className="metric-grid">
+              <div className="stat-tile"><div className="stat-label">Land Area</div><div className="stat-value mono">{state.project.landArea} {state.project.landUnit}</div></div>
+              <div className="stat-tile"><div className="stat-label">Cost per Cent</div><div className="stat-value mono">{fmtINR(state.land.costPerCent)}</div></div>
+            </div>
+            <div className="report-charge-list" style={{ marginTop: 16 }}>
+              <div className="report-charge-row"><span>Base Land Cost</span><span className="mono">{fmtINR(m.totalLandCost)}</span></div>
+              <div className="report-charge-row"><span>Registration Charges ({fmtNum(state.land.registrationPct, 1)}%)</span><span className="mono">{fmtINR(m.registration)}</span></div>
+              <div className="report-charge-row"><span>Stamp Duty ({fmtNum(state.land.stampDutyPct, 1)}%)</span><span className="mono">{fmtINR(m.stampDuty)}</span></div>
+              <div className="report-charge-row"><span>Brokerage ({fmtNum(state.land.brokeragePct, 1)}%)</span><span className="mono">{fmtINR(m.brokerage)}</span></div>
+              <div className="report-charge-row"><span>Legal Charges</span><span className="mono">{fmtINR(state.land.legalCharges)}</span></div>
+              <div className="report-charge-row"><span>Miscellaneous</span><span className="mono">{fmtINR(state.land.misc)}</span></div>
+              <div className="report-charge-row report-charge-total"><span>Total Land Acquisition Cost</span><span className="mono">{fmtINR(m.totalLandAcquisition)}</span></div>
+            </div>
+          </div>
+
+          <div className="card" style={{ marginBottom: 16 }}>
             <div className="card-head">Building & Construction</div>
             <div className="metric-grid">
               <div className="stat-tile"><div className="stat-label">Built-up Area</div><div className="stat-value mono">{fmtNum(m.builtUpArea, 0)} sqft</div></div>
