@@ -45,8 +45,12 @@ export async function fetchReportData(id: string) {
   const companyPublicUrl = (path: string) => supabase.storage.from("company-media").getPublicUrl(path).data.publicUrl;
 
   const state = project.data as ProjectState;
-  const m = computeAll(state);
-  const rec = buildRecommendation(m);
+  const mRaw = computeAll(state);
+  // computeAll() returns one internal helper function (loanBalanceAfterYears) alongside the
+  // plain data. Functions can't cross the server->client component boundary (the canvas editor
+  // is a Client Component), so strip it here — nothing in the report ever renders it directly.
+  const { loanBalanceAfterYears, ...m } = mRaw;
+  const rec = buildRecommendation(mRaw);
   const c = company as CompanyProfile | null;
   const companyName = c?.company_name || "Maharaja Engineers & Contractors";
   const today = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });

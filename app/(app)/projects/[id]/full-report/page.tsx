@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowLeftCircle, LayoutTemplate } from "lucide-react";
 import { computeAll, buildRecommendation, fmtINR, fmtNum, fmtYears, ProjectState } from "@/lib/engine";
 import { CompanyProfile, ProjectMedia, ProjectIntroSection, ProjectLocation, ReportBlock } from "@/lib/types";
-import PrintButton from "@/components/PrintButton";
 import PagedPreviewButton from "@/components/PagedPreviewButton";
 import DownloadPdfButton from "@/components/DownloadPdfButton";
 import ReportCharts from "@/components/ReportCharts";
@@ -132,7 +131,6 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           <Link href={`/projects/${id}`} className="btn-ghost"><ArrowLeftCircle size={16} /> Back to Project</Link>
           <div style={{ display: "flex", gap: 10 }}>
             <Link href={`/projects/${id}/full-report/editor`} className="btn-ghost"><LayoutTemplate size={15} /> Edit Layout</Link>
-            <PrintButton />
             <DownloadPdfButton projectId={id} />
           </div>
         </div>
@@ -244,7 +242,6 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
         <div style={{ display: "flex", gap: 10 }}>
           <Link href={`/projects/${id}/full-report/editor`} className="btn-ghost"><LayoutTemplate size={15} /> Edit Layout</Link>
           <PagedPreviewButton />
-          <PrintButton />
           <DownloadPdfButton projectId={id} />
         </div>
       </div>

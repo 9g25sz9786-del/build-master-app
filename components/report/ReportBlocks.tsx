@@ -99,7 +99,7 @@ export function TopicPlaceholder() {
 export interface ReportBlockData {
   project: { id: string; name: string; project_type: string };
   state: ProjectState;
-  m: Metrics;
+  m: Omit<Metrics, "loanBalanceAfterYears">;
   rec: { verdict: string; strengths: string[]; weaknesses: string[]; risks: string[]; improvements: string[] };
   c: CompanyProfile | null;
   companyName: string;
