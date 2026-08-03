@@ -34,7 +34,13 @@ export function generateDefaultBlocks(data: ReportBlockData): DefaultBlockSeed[]
   add("cover", "cover", "Cover Page");
   add("toc", "toc", "Table of Contents");
 
-  data.introSections.forEach((s) => add(`intro:${s.id}`, "intro_topic", `Intro — ${s.title}`, { sectionId: s.id }));
+  data.introSections.forEach((s) => {
+    // Photo (top half) and text (bottom half) of the same topic start paired on one page —
+    // still two independent blocks, so either can be moved, resized, or sent to its own page.
+    seeds.push({ block_key: `intro_photo:${s.id}`, block_type: "intro_topic_photo", label: `Intro Photo — ${s.title}`, page_number: page, x: MARGIN, y: MARGIN, width: PAGE_W, height: 110, z_index: 0, content_ref: { sectionId: s.id } });
+    seeds.push({ block_key: `intro_text:${s.id}`, block_type: "intro_topic_text", label: `Intro Text — ${s.title}`, page_number: page, x: MARGIN, y: MARGIN + 120, width: PAGE_W, height: PAGE_H - 120, z_index: 0, content_ref: { sectionId: s.id } });
+    page += 1;
+  });
 
   const hasLocation = !!(
     data.projectLocation?.description ||
@@ -43,7 +49,12 @@ export function generateDefaultBlocks(data: ReportBlockData): DefaultBlockSeed[]
     data.mapPhotos.length > 0 ||
     (data.projectLocation?.distances?.length || 0) > 0
   );
-  if (hasLocation) add("location", "location_description", "Location");
+  if (hasLocation) {
+    if (data.projectLocation?.description) add("location_desc", "location_description", "Location — Description");
+    data.locationPhotos.forEach((p) => add(`location_photo:${p.id}`, "location_photo_item", `Location Photo — ${p.title}`, { photoId: p.id }));
+    if (data.projectLocation?.latitude != null || data.mapPhotos.length > 0) add("location_map", "location_map", "Location — Map");
+    if ((data.projectLocation?.distances?.length || 0) > 0) add("location_distances", "location_distances", "Location — Distances");
+  }
 
   add("feasibility_basics", "feasibility_project_details", "Feasibility — Basics & Costs");
   add("feasibility_financials", "feasibility_cost_revenue", "Feasibility — Financials");

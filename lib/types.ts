@@ -81,8 +81,8 @@ export interface ProjectLocation {
 
 export type ReportBlockType =
   | "cover" | "toc"
-  | "intro_topic"
-  | "location_description" | "location_photos" | "location_map" | "location_distances"
+  | "intro_topic_text" | "intro_topic_photo"
+  | "location_description" | "location_photos" | "location_photo_item" | "location_map" | "location_distances"
   | "feasibility_project_details" | "feasibility_land" | "feasibility_construction"
   | "feasibility_amenities" | "feasibility_cost_revenue" | "feasibility_investment_metrics"
   | "feasibility_score"

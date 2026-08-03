@@ -173,20 +173,15 @@ export function TocBlock({ data, toc }: { data: ReportBlockData; toc: { n: strin
   );
 }
 
-export function IntroTopicBlock({ data, sectionId }: { data: ReportBlockData; sectionId: string }) {
+export function IntroTopicPhotoBlock({ data, sectionId }: { data: ReportBlockData; sectionId: string }) {
   const s = data.introSections.find((x) => x.id === sectionId);
   if (!s) return <p className="report-prose">Intro section not found — it may have been deleted.</p>;
   return (
-    <div className="report-topic">
-      <div className="report-topic-heading-row">
-        <span className="report-accent-dot" />
-        <h3 className="report-topic-title">{s.title}</h3>
-      </div>
-      <div className="report-topic-rule" />
-      <div className="report-topic-hero">
+    <div style={{ height: "100%" }}>
+      <div className="report-topic-hero" style={{ height: "100%" }}>
         {s.photos && s.photos.length > 0 ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={publicMediaUrl(s.photos[0].storage_path)} alt="" />
+          <img src={publicMediaUrl(s.photos[0].storage_path)} alt="" style={{ height: "100%", objectFit: "cover" }} />
         ) : (
           <TopicPlaceholder />
         )}
@@ -199,65 +194,115 @@ export function IntroTopicBlock({ data, sectionId }: { data: ReportBlockData; se
           ))}
         </div>
       )}
-      <p className="report-prose">{s.body}</p>
     </div>
   );
 }
 
-export function LocationBlock({ data }: { data: ReportBlockData }) {
-  const { projectLocation, locationPhotos, mapPhotos } = data;
+function sliceText(text: string, start?: number, end?: number) {
+  if (start == null && end == null) return text;
+  return text.slice(start ?? 0, end ?? text.length);
+}
+
+export function IntroTopicTextBlock({ data, sectionId, textStart, textEnd }: { data: ReportBlockData; sectionId: string; textStart?: number; textEnd?: number }) {
+  const s = data.introSections.find((x) => x.id === sectionId);
+  if (!s) return <p className="report-prose">Intro section not found — it may have been deleted.</p>;
+  const isFirstPart = textStart == null || textStart === 0;
   return (
     <div>
-      <h2 className="report-section-title">Location</h2>
-      {projectLocation?.description && (
-        <p className="report-prose" style={{ marginBottom: 20 }}>{projectLocation.description}</p>
-      )}
-      {locationPhotos.length > 0 && (
+      {isFirstPart && (
         <>
-          <h3 style={{ fontFamily: "Poppins,sans-serif", fontSize: 15, marginBottom: 4 }}>Pictures of the Place</h3>
-          <div className="report-media-grid">
-            {locationPhotos.map((p) => (
-              <div className="report-media-card" key={p.id}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={publicMediaUrl(p.storage_path)} alt={p.title} />
-              </div>
-            ))}
+          <div className="report-topic-heading-row">
+            <span className="report-accent-dot" />
+            <h3 className="report-topic-title">{s.title}</h3>
           </div>
+          <div className="report-topic-rule" />
         </>
       )}
-      {(projectLocation?.latitude != null || mapPhotos.length > 0) && (
-        <div className="card" style={{ marginTop: 20 }}>
-          <div className="card-head">Google Map</div>
-          {projectLocation?.latitude != null && projectLocation?.longitude != null && (
-            <p className="report-prose" style={{ fontSize: 13, marginBottom: mapPhotos.length > 0 ? 14 : 0 }}>
-              Coordinates: <span className="mono">{projectLocation.latitude}, {projectLocation.longitude}</span>
-            </p>
-          )}
-          {mapPhotos.length > 0 && (
-            <div className="report-media-grid">
-              {mapPhotos.map((p) => (
-                <div className="report-media-card" key={p.id}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={publicMediaUrl(p.storage_path)} alt="Map" />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <p className="report-prose">{sliceText(s.body, textStart, textEnd)}</p>
+    </div>
+  );
+}
+
+export function LocationDescriptionBlock({ data, textStart, textEnd }: { data: ReportBlockData; textStart?: number; textEnd?: number }) {
+  const { projectLocation } = data;
+  const isFirstPart = textStart == null || textStart === 0;
+  return (
+    <div>
+      {isFirstPart && <h2 className="report-section-title">Location</h2>}
+      {projectLocation?.description ? (
+        <p className="report-prose">{sliceText(projectLocation.description, textStart, textEnd)}</p>
+      ) : (
+        <p className="report-prose" style={{ color: "#999" }}>No description added yet.</p>
       )}
-      {projectLocation?.distances && projectLocation.distances.length > 0 && (
-        <div className="card" style={{ marginTop: 20 }}>
-          <div className="card-head">Distance to Key Places</div>
-          <div className="report-distance-list">
-            {projectLocation.distances.map((d, i) => (
-              <div className="report-distance-row" key={i}>
-                <span>{d.place || "—"}</span>
-                <span className="mono">{d.distance || "—"}</span>
-              </div>
-            ))}
+    </div>
+  );
+}
+
+export function LocationPhotoItemBlock({ data, photoId }: { data: ReportBlockData; photoId: string }) {
+  const p = data.locationPhotos.find((x) => x.id === photoId);
+  if (!p) return <p className="report-prose">Photo not found — it may have been deleted.</p>;
+  return (
+    <div className="report-media-card" style={{ height: "100%" }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={publicMediaUrl(p.storage_path)} alt={p.title} style={{ height: "100%" }} />
+    </div>
+  );
+}
+
+export function LocationPhotosBlock({ data }: { data: ReportBlockData }) {
+  const { locationPhotos } = data;
+  return (
+    <div>
+      <h3 style={{ fontFamily: "Poppins,sans-serif", fontSize: 15, marginBottom: 4 }}>Pictures of the Place</h3>
+      <div className="report-media-grid">
+        {locationPhotos.map((p) => (
+          <div className="report-media-card" key={p.id}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={publicMediaUrl(p.storage_path)} alt={p.title} />
           </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function LocationMapBlock({ data }: { data: ReportBlockData }) {
+  const { projectLocation, mapPhotos } = data;
+  return (
+    <div className="card">
+      <div className="card-head">Google Map</div>
+      {projectLocation?.latitude != null && projectLocation?.longitude != null && (
+        <p className="report-prose" style={{ fontSize: 13, marginBottom: mapPhotos.length > 0 ? 14 : 0 }}>
+          Coordinates: <span className="mono">{projectLocation.latitude}, {projectLocation.longitude}</span>
+        </p>
+      )}
+      {mapPhotos.length > 0 && (
+        <div className="report-media-grid">
+          {mapPhotos.map((p) => (
+            <div className="report-media-card" key={p.id}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={publicMediaUrl(p.storage_path)} alt="Map" />
+            </div>
+          ))}
         </div>
       )}
+    </div>
+  );
+}
+
+export function LocationDistancesBlock({ data }: { data: ReportBlockData }) {
+  const { projectLocation } = data;
+  return (
+    <div className="card">
+      <div className="card-head">Distance to Key Places</div>
+      <div className="report-distance-list">
+        {(projectLocation?.distances || []).map((d, i) => (
+          <div className="report-distance-row" key={i}>
+            <span>{d.place || "—"}</span>
+            <span className="mono">{d.distance || "—"}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -508,11 +553,13 @@ export function renderBlockBody(
   switch (blockType) {
     case "cover": return <CoverBlock data={data} />;
     case "toc": return <TocBlock data={data} toc={toc || []} />;
-    case "intro_topic": return <IntroTopicBlock data={data} sectionId={contentRef.sectionId} />;
-    case "location_description":
-    case "location_photos":
-    case "location_map":
-    case "location_distances": return <LocationBlock data={data} />;
+    case "intro_topic_text": return <IntroTopicTextBlock data={data} sectionId={contentRef.sectionId} textStart={contentRef.textStart} textEnd={contentRef.textEnd} />;
+    case "intro_topic_photo": return <IntroTopicPhotoBlock data={data} sectionId={contentRef.sectionId} />;
+    case "location_description": return <LocationDescriptionBlock data={data} textStart={contentRef.textStart} textEnd={contentRef.textEnd} />;
+    case "location_photos": return <LocationPhotosBlock data={data} />;
+    case "location_photo_item": return <LocationPhotoItemBlock data={data} photoId={contentRef.photoId} />;
+    case "location_map": return <LocationMapBlock data={data} />;
+    case "location_distances": return <LocationDistancesBlock data={data} />;
     case "feasibility_project_details":
     case "feasibility_land":
     case "feasibility_construction":
