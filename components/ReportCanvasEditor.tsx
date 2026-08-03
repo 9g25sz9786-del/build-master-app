@@ -14,6 +14,9 @@ const PAGE_W_MM = 210;
 const PAGE_H_MM = 297;
 const GRID_MM = 5; // alignment grid spacing, and the snap increment while dragging/resizing
 const SPLITTABLE_TYPES = ["intro_topic_text", "location_description"];
+// These render their own full-box background image/layout — an inset padding would leave an
+// unwanted border gap around them instead of a true bleed to the block's edges.
+const FULL_BLEED_TYPES = ["cover", "toc", "author_background"];
 
 type EditableBlock = Pick<
   ReportBlock,
@@ -35,6 +38,7 @@ function getFullText(block: EditableBlock, blockData: ReportBlockData): string {
 function BlockContent({ block, blockData, toc }: { block: EditableBlock; blockData: ReportBlockData; toc: { n: string; label: string }[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const [overflowing, setOverflowing] = useState(false);
+  const cropTopMm = block.content_ref.cropTopMm || 0;
 
   useEffect(() => {
     const el = ref.current;
@@ -49,8 +53,10 @@ function BlockContent({ block, blockData, toc }: { block: EditableBlock; blockDa
           <AlertTriangle size={11} /> Overflowing
         </div>
       )}
-      <div ref={ref} className="canvas-block-content">
-        {renderBlockBody(block.block_type, block.content_ref, blockData, toc)}
+      <div ref={ref} className={"canvas-block-content" + (FULL_BLEED_TYPES.includes(block.block_type) ? "" : " padded")}>
+        <div style={{ marginTop: cropTopMm ? `-${cropTopMm}mm` : 0 }}>
+          {renderBlockBody(block.block_type, block.content_ref, blockData, toc)}
+        </div>
       </div>
     </>
   );
@@ -229,6 +235,19 @@ export default function ReportCanvasEditor({
             If a text block shows "Overflowing," select it and use "Split Onto New Page" above,
             or "Duplicate Block" and trim each copy's range below.
           </p>
+          {selectedBlock && (
+            <div className="canvas-trim-panel">
+              <div className="canvas-trim-title">Crop from top</div>
+              <div className="canvas-trim-row">
+                <input
+                  type="number" min={0} step={1}
+                  value={selectedBlock.content_ref.cropTopMm || 0}
+                  onChange={(e) => updateBlock(selectedBlock.id, { content_ref: { ...selectedBlock.content_ref, cropTopMm: Math.max(0, Number(e.target.value)) } })}
+                />
+                <span>mm hidden from the top of this block's content</span>
+              </div>
+            </div>
+          )}
           {selectedBlock && SPLITTABLE_TYPES.includes(selectedBlock.block_type) && (() => {
             const fullText = getFullText(selectedBlock, blockData);
             const start = selectedBlock.content_ref.textStart ?? 0;

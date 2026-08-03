@@ -67,7 +67,9 @@ export function generateDefaultBlocks(data: ReportBlockData): DefaultBlockSeed[]
   add("conclusion", "conclusion", "Conclusion & Recommendation");
 
   if (data.c?.author_name || data.c?.author_bio || data.c?.author_photo_storage_path) {
-    add("author", "author", "About the Author");
+    seeds.push({ block_key: "author_bg", block_type: "author_background", label: "About the Author — Background", page_number: page, x: 0, y: 0, width: 210, height: 297, z_index: 0, content_ref: {} });
+    seeds.push({ block_key: "author_text", block_type: "author_text", label: "About the Author — Text", page_number: page, x: MARGIN, y: 150, width: PAGE_W, height: 130, z_index: 1, content_ref: {} });
+    page += 1;
   }
 
   add("closing", "closing", "Closing Page");

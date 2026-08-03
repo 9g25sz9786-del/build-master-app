@@ -156,3 +156,21 @@ body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; color: var(--ink
 .report-author-photo { width:240px; height:320px; border-radius:4px; object-fit:cover; flex-shrink:0; filter:grayscale(1) contrast(1.1) brightness(0.85); box-shadow:0 10px 30px rgba(0,0,0,0.45); }
 .report-author-name { font-family:'Poppins',sans-serif; font-weight:700; font-size:24px; margin-bottom:10px; }
 .report-author-bio { font-size:13.5px; line-height:1.85; color:#E8E4D8; white-space:pre-line; text-align:justify; }
+
+/* ── Closing page redesign: logo in a white band, 3 office addresses, bigger colophon logo + QR slot ── */
+.report-final-logo-band { background:#fff; display:inline-flex; align-items:center; justify-content:center; padding:16px 34px; border-radius:6px; }
+.report-final-logo { max-height:110px; max-width:320px; width:auto; height:auto; object-fit:contain; display:block; }
+
+.report-offices-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; margin-top:30px; text-align:left; }
+.report-office-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:16px 18px; }
+.report-office-title { font-family:'Poppins',sans-serif; font-weight:600; font-size:12.5px; color:#F2B632; margin-bottom:8px; }
+.report-office-card p { font-size:11.5px; line-height:1.6; color:#D8D4C8; margin:0; }
+
+.report-colophon-logo-row { display:flex; align-items:center; justify-content:center; gap:28px; margin-bottom:20px; }
+.report-colophon-logo-big { height:150px; width:auto; object-fit:contain; display:block; }
+.report-qr-placeholder {
+  width:96px; height:96px; border:1.5px dashed rgba(255,255,255,0.3); border-radius:8px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  color:#8A8A8A; font-size:10.5px; font-family:'IBM Plex Mono',monospace; text-align:center; flex-shrink:0;
+}
+.report-qr-sub { font-size:9px; color:#5E5E5E; }

@@ -311,6 +311,7 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 
 .report-author { position:relative; min-height:420px; display:flex; align-items:center; overflow:hidden; }
 .report-author-bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05) brightness(0.5); }
+.report-author-bg-fallback { position:absolute; inset:0; background:var(--r-ink,#141414); height:100%; }
 .report-author-overlay { position:absolute; inset:0; background:linear-gradient(100deg, rgba(14,14,14,0.96) 45%, rgba(14,14,14,0.55) 100%); }
 .report-author-content { position:relative; z-index:2; padding:60px 44px; color:#fff; width:100%; display:flex; align-items:center; justify-content:space-between; gap:44px; }
 .report-author-text { flex:1; min-width:0; }
@@ -521,7 +522,8 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
   background:var(--ink); color:#FFFFFF; font-size:10px; font-family:'IBM Plex Mono',monospace;
   padding:3px 8px; border-radius:4px 4px 0 0; white-space:nowrap; pointer-events:none;
 }
-.canvas-block-content { width:100%; height:100%; overflow:hidden; padding:10mm; box-sizing:border-box; }
+.canvas-block-content { width:100%; height:100%; overflow:hidden; box-sizing:border-box; }
+.canvas-block-content.padded { padding:10mm; }
 /* Native browser image-drag (the ghost-drag-to-desktop gesture) fights with react-rnd's own
    mouse-based dragging, and can silently eat the drag/resize gesture. Disabling it here makes
    every image in a block draggable/resizable via its containing box instead, as intended. */
@@ -549,6 +551,7 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
   page: canvaspage;
 }
 .report-canvas-block { position: absolute; overflow: hidden; }
+.report-canvas-block-padded { padding: 10mm; box-sizing: border-box; }
 
 @media print {
   .report-canvas-page { box-shadow: none; margin: 0; break-after: page; page-break-after: always; }
@@ -561,5 +564,28 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 
 .canvas-trim-panel { margin-bottom: 14px; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 8px; background: #FAF9F5; }
 .canvas-trim-title { font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
-.canvas-trim-row { display: flex; align-items: center; gap: 6px; font-size: 11.5px; }
+.canvas-trim-row { display: flex; align-items: center; gap: 6px; font-size: 11.5px; flex-wrap: wrap; }
 .canvas-trim-row input[type="number"] { width: 62px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; font-size: 11.5px; }
+
+/* ── Closing page redesign: logo in a white band, 3 office addresses, bigger colophon logo + QR slot ── */
+.report-final-logo-band { background:#fff; display:inline-flex; align-items:center; justify-content:center; padding:16px 34px; border-radius:6px; }
+.report-final-logo { max-height:110px; max-width:320px; width:auto; height:auto; object-fit:contain; display:block; }
+
+.report-offices-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; margin-top:30px; text-align:left; }
+.report-office-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:16px 18px; }
+.report-office-title { font-family:'Poppins',sans-serif; font-weight:600; font-size:12.5px; color:#F2B632; margin-bottom:8px; }
+.report-office-card p { font-size:11.5px; line-height:1.6; color:#D8D4C8; margin:0; }
+
+.report-colophon-logo-row { display:flex; align-items:center; justify-content:center; gap:28px; margin-bottom:20px; }
+.report-colophon-logo-big { height:150px; width:auto; object-fit:contain; display:block; }
+.report-qr-placeholder {
+  width:96px; height:96px; border:1.5px dashed rgba(255,255,255,0.3); border-radius:8px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  color:#8A8A8A; font-size:10.5px; font-family:'IBM Plex Mono',monospace; text-align:center; flex-shrink:0;
+}
+.report-qr-sub { font-size:9px; color:#5E5E5E; }
+
+@media (max-width: 860px) {
+  .report-offices-grid { grid-template-columns: 1fr; }
+  .report-colophon-logo-row { flex-direction:column; }
+}

@@ -87,7 +87,7 @@ export type ReportBlockType =
   | "feasibility_amenities" | "feasibility_cost_revenue" | "feasibility_investment_metrics"
   | "feasibility_score"
   | "media_item"
-  | "conclusion" | "author" | "closing";
+  | "conclusion" | "author" | "author_background" | "author_text" | "closing";
 
 export interface ReportBlock {
   id: string;

@@ -487,6 +487,39 @@ export function ConclusionBlock({ data }: { data: ReportBlockData }) {
   );
 }
 
+export function AuthorBackgroundBlock({ data }: { data: ReportBlockData }) {
+  const { c } = data;
+  const bgPath = c?.author_background_photo_storage_path || c?.author_photo_storage_path;
+  if (!bgPath) return <div className="report-author-bg-fallback" />;
+  return (
+    <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={publicCompanyMediaUrl(bgPath)} alt="" className="report-author-bg" style={{ position: "absolute", inset: 0 }} />
+      <div className="report-author-overlay" />
+    </div>
+  );
+}
+
+export function AuthorTextBlock({ data }: { data: ReportBlockData }) {
+  const { c } = data;
+  if (!(c?.author_name || c?.author_bio || c?.author_photo_storage_path)) return null;
+  return (
+    <div className="report-author-content" style={{ position: "static", padding: 0 }}>
+      <div className="report-author-text">
+        <div className="report-author-eyebrow"><span className="report-accent-dot" /> About the Author</div>
+        {c?.author_name && <div className="report-author-name">{c.author_name}</div>}
+        {c?.author_bio && <p className="report-author-bio">{c.author_bio}</p>}
+      </div>
+      {c?.author_photo_storage_path && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={publicCompanyMediaUrl(c.author_photo_storage_path)} alt={c?.author_name || ""} className="report-author-photo" />
+      )}
+    </div>
+  );
+}
+
+/** Used only by the automatic (non-canvas) report, which lays out background + text as one
+    flowing section rather than two independently movable blocks. */
 export function AuthorBlock({ data }: { data: ReportBlockData }) {
   const { c } = data;
   if (!(c?.author_name || c?.author_bio || c?.author_photo_storage_path)) return null;
@@ -521,22 +554,46 @@ export function ClosingBlock({ data }: { data: ReportBlockData }) {
   return (
     <div>
       <div className="report-final-cta">
-        <span className="report-accent-dot" style={{ display: "block", margin: "0 auto 16px" }} />
-        <h3>{companyName}</h3>
-        <p>{c?.tagline || "Building trust, one project at a time."}</p>
-        <div className="report-contact-grid" style={{ justifyContent: "center", textAlign: "center", color: "#C9C4B5", marginTop: 18 }}>
-          {c?.established_year && <div>Established {c.established_year}</div>}
-          {c?.completed_projects_count && <div>{c.completed_projects_count}+ Projects Completed</div>}
-          {c?.phone && <div>{c.phone}</div>}
-          {c?.email && <div>{c.email}</div>}
-          {c?.website && <div>{c.website}</div>}
-          {c?.address && <div>{c.address}</div>}
+        {c?.logo_storage_path && (
+          <div className="report-final-logo-band">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={publicCompanyMediaUrl(c.logo_storage_path)} alt={companyName} className="report-final-logo" />
+          </div>
+        )}
+        <p style={{ marginTop: c?.logo_storage_path ? 26 : 0 }}>{c?.tagline || "Building trust, one project at a time."}</p>
+
+        <div className="report-offices-grid">
+          <div className="report-office-card">
+            <div className="report-office-title">Design Studio</div>
+            <p>141A, Maharaja Engineers, Cherthala, Alappuzha — 688529</p>
+          </div>
+          <div className="report-office-card">
+            <div className="report-office-title">Thripunithura Office</div>
+            <p>Maharaja Engineers &amp; Contractors, 555 H1, 3rd Floor, Malayil Majesty, Thripunithura — 682301</p>
+          </div>
+          <div className="report-office-card">
+            <div className="report-office-title">Coimbatore Office</div>
+            <p>Maharaja Engineers &amp; Contractors, 2nd Floor, Curtain Studio, TV Swamy Rd, R.S. Puram, Coimbatore, Tamil Nadu — 641002</p>
+          </div>
         </div>
+
+        {(c?.phone || c?.email || c?.website) && (
+          <div className="report-contact-grid" style={{ justifyContent: "center", textAlign: "center", color: "#C9C4B5", marginTop: 22 }}>
+            {c?.phone && <div>{c.phone}</div>}
+            {c?.email && <div>{c.email}</div>}
+            {c?.website && <div>{c.website}</div>}
+          </div>
+        )}
       </div>
       <div className="report-colophon">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="Build Master" className="report-colophon-logo" />
-        <div className="report-colophon-name">Build Master</div>
+        <div className="report-colophon-logo-row">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Build Master" className="report-colophon-logo-big" />
+          <div className="report-qr-placeholder">
+            <span>QR Code</span>
+            <span className="report-qr-sub">Instagram</span>
+          </div>
+        </div>
         <div className="report-colophon-sub">Project Feasibility Intelligence · Report generated {today}</div>
       </div>
     </div>
@@ -570,6 +627,8 @@ export function renderBlockBody(
     case "media_item": return <MediaItemBlock data={data} mediaId={contentRef.mediaId} />;
     case "conclusion": return <ConclusionBlock data={data} />;
     case "author": return <AuthorBlock data={data} />;
+    case "author_background": return <AuthorBackgroundBlock data={data} />;
+    case "author_text": return <AuthorTextBlock data={data} />;
     case "closing": return <ClosingBlock data={data} />;
     default: return (
       <p className="report-prose" style={{ color: "#C1272D" }}>

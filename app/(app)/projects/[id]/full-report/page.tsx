@@ -143,10 +143,12 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
                 .map((b) => (
                   <div
                     key={b.id}
-                    className="report-canvas-block"
+                    className={"report-canvas-block" + (["cover", "toc", "author_background"].includes(b.block_type) ? "" : " report-canvas-block-padded")}
                     style={{ left: `${b.x}mm`, top: `${b.y}mm`, width: `${b.width}mm`, height: `${b.height}mm`, zIndex: b.z_index }}
                   >
-                    {renderBlockBody(b.block_type, b.content_ref, blockData, lockedToc)}
+                    <div style={{ marginTop: b.content_ref.cropTopMm ? `-${b.content_ref.cropTopMm}mm` : 0 }}>
+                      {renderBlockBody(b.block_type, b.content_ref, blockData, lockedToc)}
+                    </div>
                   </div>
                 ))}
             </div>
@@ -632,23 +634,47 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
 
         {/* Closing: company contact + colophon */}
         <div className="report-final-cta">
-          <span className="report-accent-dot" style={{ display: "block", margin: "0 auto 16px" }} />
-          <h3>{companyName}</h3>
-          <p>{c?.tagline || "Building trust, one project at a time."}</p>
-          <div className="report-contact-grid" style={{ justifyContent: "center", textAlign: "center", color: "#C9C4B5", marginTop: 18 }}>
-            {c?.established_year && <div>Established {c.established_year}</div>}
-            {c?.completed_projects_count && <div>{c.completed_projects_count}+ Projects Completed</div>}
-            {c?.phone && <div>{c.phone}</div>}
-            {c?.email && <div>{c.email}</div>}
-            {c?.website && <div>{c.website}</div>}
-            {c?.address && <div>{c.address}</div>}
+          {c?.logo_storage_path && (
+            <div className="report-final-logo-band">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={companyPublicUrl(c.logo_storage_path)} alt={companyName} className="report-final-logo" />
+            </div>
+          )}
+          <p style={{ marginTop: c?.logo_storage_path ? 26 : 0 }}>{c?.tagline || "Building trust, one project at a time."}</p>
+
+          <div className="report-offices-grid">
+            <div className="report-office-card">
+              <div className="report-office-title">Design Studio</div>
+              <p>141A, Maharaja Engineers, Cherthala, Alappuzha — 688529</p>
+            </div>
+            <div className="report-office-card">
+              <div className="report-office-title">Thripunithura Office</div>
+              <p>Maharaja Engineers &amp; Contractors, 555 H1, 3rd Floor, Malayil Majesty, Thripunithura — 682301</p>
+            </div>
+            <div className="report-office-card">
+              <div className="report-office-title">Coimbatore Office</div>
+              <p>Maharaja Engineers &amp; Contractors, 2nd Floor, Curtain Studio, TV Swamy Rd, R.S. Puram, Coimbatore, Tamil Nadu — 641002</p>
+            </div>
           </div>
+
+          {(c?.phone || c?.email || c?.website) && (
+            <div className="report-contact-grid" style={{ justifyContent: "center", textAlign: "center", color: "#C9C4B5", marginTop: 22 }}>
+              {c?.phone && <div>{c.phone}</div>}
+              {c?.email && <div>{c.email}</div>}
+              {c?.website && <div>{c.website}</div>}
+            </div>
+          )}
         </div>
 
         <div className="report-colophon">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Build Master" className="report-colophon-logo" />
-          <div className="report-colophon-name">Build Master</div>
+          <div className="report-colophon-logo-row">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Build Master" className="report-colophon-logo-big" />
+            <div className="report-qr-placeholder">
+              <span>QR Code</span>
+              <span className="report-qr-sub">Instagram</span>
+            </div>
+          </div>
           <div className="report-colophon-sub">Project Feasibility Intelligence · Report generated {today}</div>
         </div>
       </div>
