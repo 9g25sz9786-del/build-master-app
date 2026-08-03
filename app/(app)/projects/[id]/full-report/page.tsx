@@ -490,7 +490,8 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
             </div>
           </div>
 
-          <ReportCharts costBreakdown={m.costBreakdown} revenueBreakdown={m.revenueBreakdown} />
+          <div className="report-charts-page">
+            <ReportCharts costBreakdown={m.costBreakdown} revenueBreakdown={m.revenueBreakdown} />
 
           <div className="card" style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 24 }}>
             <ScoreGaugeStatic score={m.overallScore} />
@@ -526,6 +527,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
             <p className="report-prose" style={{ fontSize: 11.5, marginTop: 12, color: "#999" }}>
               This project scores {fmtNum(m.overallScore)}/10, placing it in the <b>{m.scoreLabel}</b> band above.
             </p>
+          </div>
           </div>
         </section>
 

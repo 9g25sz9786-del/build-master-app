@@ -74,9 +74,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     await page.waitForSelector(".chart-cols svg", { timeout: 8000 }).catch(() => {});
     await new Promise((resolve) => setTimeout(resolve, 400));
 
-    // preferCSSPageSize makes Chromium honour the report's own @page { size: A4; margin: ... }
-    // rules exactly, instead of substituting its own default format/margins.
-    const pdf = await page.pdf({ printBackground: true, preferCSSPageSize: true });
+    // Explicit format + margins (matching the report's own @page CSS) rather than
+    // preferCSSPageSize — Puppeteer's displayHeaderFooter/footerTemplate option (used below for
+    // page numbers) only reserves space correctly when margins are set this way.
+    const pdf = await page.pdf({
+      printBackground: true,
+      format: "A4",
+      margin: { top: "18mm", bottom: "18mm", left: "15mm", right: "15mm" },
+      displayHeaderFooter: true,
+      headerTemplate: "<div></div>",
+      footerTemplate:
+        '<div style="width:100%;font-size:9px;text-align:center;color:#999;font-family:\'IBM Plex Mono\',monospace;">' +
+        '<span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+    });
 
     const safeName = (project.name || "feasibility-report").replace(/[^a-z0-9-_ ]/gi, "").trim() || "feasibility-report";
 
