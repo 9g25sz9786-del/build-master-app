@@ -77,8 +77,13 @@ export default function ReportCanvasEditor({
   const pageBlocks = blocks.filter((b) => b.page_number === activePage).sort((a, b) => a.z_index - b.z_index);
   const selectedBlock = blocks.find((b) => b.id === selectedId) || null;
 
-  function addBlankPage() {
-    setActivePage(maxPage + 1);
+  /** Inserts a genuinely new blank page right after the page you're currently viewing, and
+      shifts every later page up by one — like inserting a page in a document, not just
+      appending an empty page at the very end. */
+  function insertPageAfterActive() {
+    const insertAt = activePage;
+    setBlocks((prev) => prev.map((b) => (b.page_number > insertAt ? { ...b, page_number: b.page_number + 1 } : b)));
+    setActivePage(insertAt + 1);
   }
 
   function updateBlock(id: string, patch: Partial<EditableBlock>) {
@@ -103,7 +108,8 @@ export default function ReportCanvasEditor({
       alert("This block's text is too short to split further.");
       return;
     }
-    const newPage = maxPage + 1;
+    const newPage = selectedBlock.page_number + 1;
+    setBlocks((prev) => prev.map((b) => (b.page_number >= newPage ? { ...b, page_number: b.page_number + 1 } : b)));
     const newBlock: EditableBlock = {
       ...selectedBlock,
       id: crypto.randomUUID(),
@@ -150,7 +156,7 @@ export default function ReportCanvasEditor({
               {p}
             </button>
           ))}
-          <button className="canvas-page-tab canvas-page-add" onClick={addBlankPage} title="Add a new blank page">
+          <button className="canvas-page-tab canvas-page-add" onClick={insertPageAfterActive} title="Insert a new blank page right after the one you're viewing">
             <Plus size={13} />
           </button>
         </div>
@@ -163,7 +169,7 @@ export default function ReportCanvasEditor({
           <button className="btn-ghost" onClick={() => setShowGrid((v) => !v)}>
             <Grid3x3 size={14} /> {showGrid ? "Hide Grid" : "Show Grid"}
           </button>
-          <button className="btn-ghost" onClick={addBlankPage}><Plus size={14} /> Add Page</button>
+          <button className="btn-ghost" onClick={insertPageAfterActive}><Plus size={14} /> Add Page</button>
           <button className="btn-ghost" onClick={handleReset}><RotateCcw size={14} /> Reset to Automatic</button>
           <button className="btn-primary" onClick={handleSave} disabled={saving === "saving"}>
             {saving === "saving" ? <Loader2 size={14} className="spin" /> : <Save size={14} />}

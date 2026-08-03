@@ -571,6 +571,12 @@ export function renderBlockBody(
     case "conclusion": return <ConclusionBlock data={data} />;
     case "author": return <AuthorBlock data={data} />;
     case "closing": return <ClosingBlock data={data} />;
-    default: return <p className="report-prose">Unknown block type: {blockType}</p>;
+    default: return (
+      <p className="report-prose" style={{ color: "#C1272D" }}>
+        This block was saved with an older version of the layout system and can't be shown anymore.
+        Go to <b>Reset to Automatic</b>, then <b>Start Manual Layout</b> again to rebuild this project's
+        layout with the current blocks (your automatic report itself is unaffected).
+      </p>
+    );
   }
 }
