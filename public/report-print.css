@@ -172,9 +172,4 @@ body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; color: var(--ink
 
 .report-colophon-logo-row { display:flex; align-items:center; justify-content:center; gap:28px; margin-bottom:20px; }
 .report-colophon-logo-big { height:150px; width:auto; object-fit:contain; display:block; }
-.report-qr-placeholder {
-  width:96px; height:96px; border:1.5px dashed rgba(255,255,255,0.3); border-radius:8px;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
-  color:#8A8A8A; font-size:10.5px; font-family:'IBM Plex Mono',monospace; text-align:center; flex-shrink:0;
-}
-.report-qr-sub { font-size:9px; color:#5E5E5E; }
+.report-qr-code { height:150px; width:150px; object-fit:contain; border-radius:10px; flex-shrink:0; }

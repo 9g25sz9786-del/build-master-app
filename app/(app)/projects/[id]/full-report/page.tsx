@@ -665,25 +665,17 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
               <WhatsAppIcon />
               <span>+91 7561000480, 9567100048</span>
             </div>
+            {c?.email && <div className="report-final-number-row">{c.email}</div>}
+            {c?.website && <div className="report-final-number-row">{c.website}</div>}
           </div>
-
-          {(c?.phone || c?.email || c?.website) && (
-            <div className="report-contact-grid" style={{ justifyContent: "center", textAlign: "center", color: "#C9C4B5", marginTop: 22 }}>
-              {c?.phone && <div>{c.phone}</div>}
-              {c?.email && <div>{c.email}</div>}
-              {c?.website && <div>{c.website}</div>}
-            </div>
-          )}
         </div>
 
         <div className="report-colophon">
           <div className="report-colophon-logo-row">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Build Master" className="report-colophon-logo-big" />
-            <div className="report-qr-placeholder">
-              <span>QR Code</span>
-              <span className="report-qr-sub">Instagram</span>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/qr-instagram.png" alt="Scan for Instagram — @buildmasterindia" className="report-qr-code" />
           </div>
           <div className="report-colophon-sub">Project Feasibility Intelligence · Report generated {today}</div>
         </div>
