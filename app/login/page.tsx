@@ -49,7 +49,7 @@ export default function LoginPage() {
       <div className="auth-grid-bg" />
       <form className="auth-card" onSubmit={handleSubmit}>
         <div className="auth-brand">
-          <Image src="/logo.png" alt="Build Master" width={72} height={72} style={{ borderRadius: 16 }} />
+          <Image src="/logo.png" alt="Build Master" width={180} height={180} style={{ borderRadius: 30 }} />
           <span className="auth-brand-name">Build Master</span>
         </div>
         <h1 className="auth-title">{mode === "signin" ? "Sign in" : "Create your account"}</h1>
