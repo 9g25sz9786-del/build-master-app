@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import { Rnd } from "react-rnd";
-import { Plus, Save, RotateCcw, Loader2, Grid3x3, AlertTriangle, Scissors } from "lucide-react";
+import { Plus, Save, RotateCcw, Loader2, Grid3x3, AlertTriangle, Scissors, Copy, Trash2 } from "lucide-react";
 import { saveReportLayout, resetReportLayout } from "@/app/actions";
 import { renderBlockBody, ReportBlockData } from "@/components/report/ReportBlocks";
 import { ReportBlock } from "@/lib/types";
@@ -86,6 +86,41 @@ export default function ReportCanvasEditor({
     setActivePage(insertAt + 1);
   }
 
+  /** Copies the selected block onto a new page right after it, with the exact same content —
+      no auto-splitting. Meant for cases where you want to manually decide what stays on each
+      copy (e.g. trim the text range yourself) rather than an automatic even split. */
+  function handleDuplicateBlock() {
+    if (!selectedBlock) return;
+    const newPage = selectedBlock.page_number + 1;
+    setBlocks((prev) => prev.map((b) => (b.page_number >= newPage ? { ...b, page_number: b.page_number + 1 } : b)));
+    const newBlock: EditableBlock = {
+      ...selectedBlock,
+      id: crypto.randomUUID(),
+      block_key: `${selectedBlock.block_key}:copy${Date.now()}`,
+      label: `${selectedBlock.label} (copy)`,
+      page_number: newPage,
+    };
+    setBlocks((prev) => [...prev, newBlock]);
+    setActivePage(newPage);
+    setSelectedId(newBlock.id);
+  }
+
+  /** Removes a page outright and renumbers every later page down by one, closing the gap —
+      for when arranging blocks leaves an empty page in the middle. If the page still has
+      blocks on it, they're deleted too, after confirming. */
+  function handleRemovePage(pageNum: number) {
+    const blocksHere = blocks.filter((b) => b.page_number === pageNum);
+    if (blocksHere.length > 0) {
+      if (!confirm(`Page ${pageNum} still has ${blocksHere.length} block(s) on it. Remove the page and delete ${blocksHere.length === 1 ? "it" : "them"} too?`)) return;
+    }
+    setBlocks((prev) =>
+      prev
+        .filter((b) => b.page_number !== pageNum)
+        .map((b) => (b.page_number > pageNum ? { ...b, page_number: b.page_number - 1 } : b))
+    );
+    setActivePage(Math.max(1, pageNum - 1));
+  }
+
   function updateBlock(id: string, patch: Partial<EditableBlock>) {
     setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
   }
@@ -161,6 +196,11 @@ export default function ReportCanvasEditor({
           </button>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          {selectedBlock && (
+            <button className="btn-ghost" onClick={handleDuplicateBlock} title="Copy this block onto a new page, so you can trim each copy yourself">
+              <Copy size={14} /> Duplicate Block
+            </button>
+          )}
           {selectedBlock && SPLITTABLE_TYPES.includes(selectedBlock.block_type) && (
             <button className="btn-ghost" onClick={handleSplitBlock} title="Move the second half of this text onto a new page">
               <Scissors size={14} /> Split Onto New Page
@@ -170,6 +210,9 @@ export default function ReportCanvasEditor({
             <Grid3x3 size={14} /> {showGrid ? "Hide Grid" : "Show Grid"}
           </button>
           <button className="btn-ghost" onClick={insertPageAfterActive}><Plus size={14} /> Add Page</button>
+          <button className="btn-ghost" onClick={() => handleRemovePage(activePage)} title="Remove the page you're currently viewing">
+            <Trash2 size={14} /> Remove Page
+          </button>
           <button className="btn-ghost" onClick={handleReset}><RotateCcw size={14} /> Reset to Automatic</button>
           <button className="btn-primary" onClick={handleSave} disabled={saving === "saving"}>
             {saving === "saving" ? <Loader2 size={14} className="spin" /> : <Save size={14} />}
@@ -183,8 +226,31 @@ export default function ReportCanvasEditor({
           <div className="canvas-sidebar-title">Blocks ({blocks.length})</div>
           <p className="note" style={{ marginBottom: 10 }}>
             Click a block to jump to its page. Use the dropdown to move it to a different page.
-            If a text block shows "Overflowing," select it and use "Split Onto New Page" above.
+            If a text block shows "Overflowing," select it and use "Split Onto New Page" above,
+            or "Duplicate Block" and trim each copy's range below.
           </p>
+          {selectedBlock && SPLITTABLE_TYPES.includes(selectedBlock.block_type) && (() => {
+            const fullText = getFullText(selectedBlock, blockData);
+            const start = selectedBlock.content_ref.textStart ?? 0;
+            const end = selectedBlock.content_ref.textEnd ?? fullText.length;
+            return (
+              <div className="canvas-trim-panel">
+                <div className="canvas-trim-title">Trim visible text ({fullText.length} characters total)</div>
+                <div className="canvas-trim-row">
+                  <label>From</label>
+                  <input
+                    type="number" min={0} max={fullText.length} value={start}
+                    onChange={(e) => updateBlock(selectedBlock.id, { content_ref: { ...selectedBlock.content_ref, textStart: Math.max(0, Math.min(Number(e.target.value), end - 1)) } })}
+                  />
+                  <label>To</label>
+                  <input
+                    type="number" min={0} max={fullText.length} value={end}
+                    onChange={(e) => updateBlock(selectedBlock.id, { content_ref: { ...selectedBlock.content_ref, textEnd: Math.min(fullText.length, Math.max(Number(e.target.value), start + 1)) } })}
+                  />
+                </div>
+              </div>
+            );
+          })()}
           {blocks
             .slice()
             .sort((a, b) => a.page_number - b.page_number)

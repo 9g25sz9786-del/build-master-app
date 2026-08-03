@@ -230,7 +230,7 @@ export function LocationDescriptionBlock({ data, textStart, textEnd }: { data: R
     <div>
       {isFirstPart && <h2 className="report-section-title">Location</h2>}
       {projectLocation?.description ? (
-        <p className="report-prose">{sliceText(projectLocation.description, textStart, textEnd)}</p>
+        <p className="report-prose" style={{ textAlign: "justify" }}>{sliceText(projectLocation.description, textStart, textEnd)}</p>
       ) : (
         <p className="report-prose" style={{ color: "#999" }}>No description added yet.</p>
       )}
