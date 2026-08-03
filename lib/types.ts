@@ -79,6 +79,33 @@ export interface ProjectLocation {
   updated_at: string;
 }
 
+export type ReportBlockType =
+  | "cover" | "toc"
+  | "intro_topic"
+  | "location_description" | "location_photos" | "location_map" | "location_distances"
+  | "feasibility_project_details" | "feasibility_land" | "feasibility_construction"
+  | "feasibility_amenities" | "feasibility_cost_revenue" | "feasibility_investment_metrics"
+  | "feasibility_score"
+  | "media_item"
+  | "conclusion" | "author" | "closing";
+
+export interface ReportBlock {
+  id: string;
+  project_id: string;
+  block_key: string;
+  block_type: ReportBlockType;
+  label: string;
+  page_number: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  z_index: number;
+  content_ref: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface TeamMember {
   id: string;
   owner_id: string;

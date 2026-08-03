@@ -402,3 +402,58 @@ export async function removeSectionPhoto(sectionId: string, storagePath: string)
   revalidatePath("/company-profile");
 }
 
+
+/* ─────────────────────────────── Report Canvas Layout ─────────────────────────────── */
+
+export async function generateDefaultReportLayout(projectId: string) {
+  const { fetchReportData } = await import("@/lib/report/fetchReportData");
+  const { generateDefaultBlocks } = await import("@/lib/report/generateDefaultBlocks");
+  const supabase = await createClient();
+
+  const { blockData } = await fetchReportData(projectId);
+  const seeds = generateDefaultBlocks(blockData);
+
+  await supabase.from("project_report_blocks").delete().eq("project_id", projectId);
+  const { error } = await supabase.from("project_report_blocks").insert(
+    seeds.map((s) => ({ project_id: projectId, ...s }))
+  );
+  if (error) throw new Error(error.message);
+  revalidatePath(`/projects/${projectId}/full-report`);
+  revalidatePath(`/projects/${projectId}/full-report/editor`);
+}
+
+export async function saveReportLayout(
+  projectId: string,
+  blocks: {
+    block_key: string; block_type: string; label: string;
+    page_number: number; x: number; y: number; width: number; height: number; z_index: number;
+    content_ref: Record<string, any>;
+  }[]
+) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("project_report_blocks").upsert(
+    blocks.map((b) => ({ project_id: projectId, ...b, updated_at: new Date().toISOString() })),
+    { onConflict: "project_id,block_key" }
+  );
+  if (error) throw new Error(error.message);
+  revalidatePath(`/projects/${projectId}/full-report`);
+}
+
+export async function resetReportLayout(projectId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("project_report_blocks").delete().eq("project_id", projectId);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/projects/${projectId}/full-report`);
+  revalidatePath(`/projects/${projectId}/full-report/editor`);
+}
+
+export async function getReportBlocks(projectId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_report_blocks")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("page_number", { ascending: true });
+  if (error) throw new Error(error.message);
+  return data || [];
+}

@@ -2,13 +2,15 @@ import type { CSSProperties } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeftCircle } from "lucide-react";
+import { ArrowLeftCircle, LayoutTemplate } from "lucide-react";
 import { computeAll, buildRecommendation, fmtINR, fmtNum, fmtYears, ProjectState } from "@/lib/engine";
-import { CompanyProfile, ProjectMedia, ProjectIntroSection, ProjectLocation } from "@/lib/types";
+import { CompanyProfile, ProjectMedia, ProjectIntroSection, ProjectLocation, ReportBlock } from "@/lib/types";
 import PrintButton from "@/components/PrintButton";
 import PagedPreviewButton from "@/components/PagedPreviewButton";
 import DownloadPdfButton from "@/components/DownloadPdfButton";
 import ReportCharts from "@/components/ReportCharts";
+import { renderBlockBody } from "@/components/report/ReportBlocks";
+import { fetchReportData } from "@/lib/report/fetchReportData";
 
 export const dynamic = "force-dynamic";
 
@@ -111,6 +113,51 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // If this project has a manually-arranged canvas layout, render from that instead of the
+  // automatic flowing report below — completely separate code path so the automatic report
+  // (used by every project that hasn't opted into manual layout) is never touched by this.
+  const { data: reportBlockRows } = await supabase
+    .from("project_report_blocks")
+    .select("*")
+    .eq("project_id", id)
+    .order("page_number", { ascending: true });
+  const reportBlocks = (reportBlockRows as ReportBlock[]) || [];
+
+  if (reportBlocks.length > 0) {
+    const { project: lockedProject, blockData, toc: lockedToc } = await fetchReportData(id);
+    const pageNumbers = Array.from(new Set(reportBlocks.map((b) => b.page_number))).sort((a, b) => a - b);
+    return (
+      <div className="report-page">
+        <div className="report-topbar no-print">
+          <Link href={`/projects/${id}`} className="btn-ghost"><ArrowLeftCircle size={16} /> Back to Project</Link>
+          <div style={{ display: "flex", gap: 10 }}>
+            <Link href={`/projects/${id}/full-report/editor`} className="btn-ghost"><LayoutTemplate size={15} /> Edit Layout</Link>
+            <PrintButton />
+            <DownloadPdfButton projectId={id} />
+          </div>
+        </div>
+        <div id="report-content">
+          {pageNumbers.map((pn) => (
+            <div key={pn} className="report-canvas-page">
+              {reportBlocks
+                .filter((b) => b.page_number === pn)
+                .sort((a, b) => a.z_index - b.z_index)
+                .map((b) => (
+                  <div
+                    key={b.id}
+                    className="report-canvas-block"
+                    style={{ left: `${b.x}mm`, top: `${b.y}mm`, width: `${b.width}mm`, height: `${b.height}mm`, zIndex: b.z_index }}
+                  >
+                    {renderBlockBody(b.block_type, b.content_ref, blockData, lockedToc)}
+                  </div>
+                ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const { data: project, error } = await supabase
     .from("projects")
     .select("id, name, project_type, data, user_id, updated_at")
@@ -195,6 +242,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
       <div className="report-topbar no-print">
         <Link href={`/projects/${id}`} className="btn-ghost"><ArrowLeftCircle size={16} /> Back to Project</Link>
         <div style={{ display: "flex", gap: 10 }}>
+          <Link href={`/projects/${id}/full-report/editor`} className="btn-ghost"><LayoutTemplate size={15} /> Edit Layout</Link>
           <PagedPreviewButton />
           <PrintButton />
           <DownloadPdfButton projectId={id} />
