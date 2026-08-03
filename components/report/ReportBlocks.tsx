@@ -1,6 +1,7 @@
 import { fmtINR, fmtNum, fmtYears, ProjectState, Metrics } from "@/lib/engine";
 import { CompanyProfile, ProjectMedia, ProjectIntroSection, ProjectLocation, ReportBlockType } from "@/lib/types";
 import ReportCharts from "@/components/ReportCharts";
+import { publicMediaUrl, publicCompanyMediaUrl } from "@/lib/report/publicUrl";
 
 export const PROJECT_TYPE_LABEL: Record<string, string> = {
   hostel: "Hostel", apartment: "Apartment Building", commercial: "Commercial Building",
@@ -114,17 +115,15 @@ export interface ReportBlockData {
   coverImage: ProjectMedia | undefined;
   roomCountLabel: string | null;
   roomCountValue: number | null;
-  publicUrl: (path: string) => string;
-  companyPublicUrl: (path: string) => string;
 }
 
 export function CoverBlock({ data }: { data: ReportBlockData }) {
-  const { project, state, m, c, companyName, today, coverImage, publicUrl, companyPublicUrl } = data;
+  const { project, state, m, c, companyName, today, coverImage } = data;
   return (
     <div className="report-cover">
       {coverImage ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={publicUrl(coverImage.storage_path)} alt="" className="report-cover-bg" />
+        <img src={publicMediaUrl(coverImage.storage_path)} alt="" className="report-cover-bg" />
       ) : (
         <CoverPlaceholder />
       )}
@@ -133,7 +132,7 @@ export function CoverBlock({ data }: { data: ReportBlockData }) {
         {c?.logo_storage_path ? (
           <div className="report-cover-logo-band">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={companyPublicUrl(c.logo_storage_path)} alt={companyName} />
+            <img src={publicCompanyMediaUrl(c.logo_storage_path)} alt={companyName} />
           </div>
         ) : (
           <span className="report-cover-logo-text">{companyName}</span>
@@ -187,7 +186,7 @@ export function IntroTopicBlock({ data, sectionId }: { data: ReportBlockData; se
       <div className="report-topic-hero">
         {s.photos && s.photos.length > 0 ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={data.publicUrl(s.photos[0].storage_path)} alt="" />
+          <img src={publicMediaUrl(s.photos[0].storage_path)} alt="" />
         ) : (
           <TopicPlaceholder />
         )}
@@ -196,7 +195,7 @@ export function IntroTopicBlock({ data, sectionId }: { data: ReportBlockData; se
         <div className="report-topic-grid">
           {s.photos.slice(1).map((p) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={p.storage_path} src={data.publicUrl(p.storage_path)} alt="" />
+            <img key={p.storage_path} src={publicMediaUrl(p.storage_path)} alt="" />
           ))}
         </div>
       )}
@@ -206,7 +205,7 @@ export function IntroTopicBlock({ data, sectionId }: { data: ReportBlockData; se
 }
 
 export function LocationBlock({ data }: { data: ReportBlockData }) {
-  const { projectLocation, locationPhotos, mapPhotos, publicUrl } = data;
+  const { projectLocation, locationPhotos, mapPhotos } = data;
   return (
     <div>
       <h2 className="report-section-title">Location</h2>
@@ -220,7 +219,7 @@ export function LocationBlock({ data }: { data: ReportBlockData }) {
             {locationPhotos.map((p) => (
               <div className="report-media-card" key={p.id}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={publicUrl(p.storage_path)} alt={p.title} />
+                <img src={publicMediaUrl(p.storage_path)} alt={p.title} />
               </div>
             ))}
           </div>
@@ -239,7 +238,7 @@ export function LocationBlock({ data }: { data: ReportBlockData }) {
               {mapPhotos.map((p) => (
                 <div className="report-media-card" key={p.id}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={publicUrl(p.storage_path)} alt="Map" />
+                  <img src={publicMediaUrl(p.storage_path)} alt="Map" />
                 </div>
               ))}
             </div>
@@ -408,7 +407,7 @@ export function MediaItemBlock({ data, mediaId }: { data: ReportBlockData; media
   return (
     <div className="report-media-card" style={{ height: "100%" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={data.publicUrl(r.storage_path)} alt={r.title} style={{ height: "calc(100% - 40px)" }} />
+      <img src={publicMediaUrl(r.storage_path)} alt={r.title} style={{ height: "calc(100% - 40px)" }} />
       <div className="report-media-title">{r.title}</div>
       {r.caption && <div className="report-media-caption">{r.caption}</div>}
     </div>
@@ -444,14 +443,14 @@ export function ConclusionBlock({ data }: { data: ReportBlockData }) {
 }
 
 export function AuthorBlock({ data }: { data: ReportBlockData }) {
-  const { c, companyPublicUrl } = data;
+  const { c } = data;
   if (!(c?.author_name || c?.author_bio || c?.author_photo_storage_path)) return null;
   return (
     <div className="report-author" style={{ position: "relative", height: "100%" }}>
       {(c?.author_background_photo_storage_path || c?.author_photo_storage_path) ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={companyPublicUrl(c.author_background_photo_storage_path || c.author_photo_storage_path!)}
+          src={publicCompanyMediaUrl(c.author_background_photo_storage_path || c.author_photo_storage_path!)}
           alt=""
           className="report-author-bg"
         />
@@ -465,7 +464,7 @@ export function AuthorBlock({ data }: { data: ReportBlockData }) {
         </div>
         {c?.author_photo_storage_path && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={companyPublicUrl(c.author_photo_storage_path)} alt={c?.author_name || ""} className="report-author-photo" />
+          <img src={publicCompanyMediaUrl(c.author_photo_storage_path)} alt={c?.author_name || ""} className="report-author-photo" />
         )}
       </div>
     </div>

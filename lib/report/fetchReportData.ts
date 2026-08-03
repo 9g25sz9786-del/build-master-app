@@ -41,8 +41,6 @@ export async function fetchReportData(id: string) {
   const projectLocation = locationRow as ProjectLocation | null;
 
   const media = (mediaRows as ProjectMedia[]) || [];
-  const publicUrl = (path: string) => supabase.storage.from("project-media").getPublicUrl(path).data.publicUrl;
-  const companyPublicUrl = (path: string) => supabase.storage.from("company-media").getPublicUrl(path).data.publicUrl;
 
   const state = project.data as ProjectState;
   const mRaw = computeAll(state);
@@ -91,7 +89,7 @@ export async function fetchReportData(id: string) {
     project: { id: project.id, name: project.name, project_type: project.project_type },
     state, m, rec, c, companyName, today,
     introSections, projectLocation, locationPhotos, mapPhotos, renders, plans, sitePhotos,
-    coverImage, roomCountLabel, roomCountValue, publicUrl, companyPublicUrl,
+    coverImage, roomCountLabel, roomCountValue,
   };
 
   return { project, blockData, toc, sectionNum, hasGalleryMedia, hasLocationContent, hasAuthorContent };
