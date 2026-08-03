@@ -32,6 +32,14 @@ export function MetricStat({ label, value }: { label: string; value: string }) {
   );
 }
 
+export function WhatsAppIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="#3DDC84" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.82 12.04 21.82C17.5 21.82 21.95 17.37 21.95 11.91C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.68 2 12.04 2ZM12.04 3.67C14.24 3.67 16.31 4.53 17.87 6.09C19.43 7.65 20.29 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.03 20.15C10.56 20.15 9.12 19.76 7.86 19.03L7.55 18.85L4.42 19.67L5.26 16.61L5.06 16.29C4.26 14.98 3.84 13.47 3.84 11.91C3.85 7.37 7.5 3.67 12.04 3.67ZM8.53 6.65C8.37 6.65 8.1 6.71 7.87 6.96C7.65 7.21 7 7.82 7 9.03C7 10.25 7.89 11.42 8.01 11.59C8.14 11.75 9.76 14.28 12.29 15.36C13.05 15.71 13.64 15.91 14.1 16.06C14.86 16.31 15.55 16.27 16.1 16.19C16.71 16.1 17.98 15.42 18.25 14.68C18.51 13.94 18.51 13.31 18.43 13.18C18.36 13.05 18.18 12.97 17.9 12.84C17.63 12.7 16.29 12.05 16.04 11.96C15.79 11.87 15.61 11.83 15.44 12.09C15.27 12.35 14.77 12.93 14.62 13.11C14.47 13.28 14.32 13.3 14.06 13.17C13.79 13.03 12.92 12.75 11.89 11.83C11.09 11.11 10.55 10.24 10.4 9.98C10.25 9.72 10.38 9.58 10.51 9.45C10.63 9.33 10.78 9.14 10.91 8.99C11.05 8.84 11.1 8.73 11.19 8.55C11.28 8.38 11.24 8.22 11.18 8.09C11.11 7.96 10.59 6.61 10.35 6.07C10.13 5.56 9.91 5.62 9.74 5.62C9.58 5.61 9.4 5.61 9.23 5.61C9.06 5.61 8.78 5.67 8.53 6.65Z" />
+    </svg>
+  );
+}
+
 export function ScoreGaugeStatic({ score }: { score: number }) {
   const pct = Math.min(10, Math.max(0, score)) / 10;
   const angle = 180 + pct * 180;
@@ -564,8 +572,8 @@ export function ClosingBlock({ data }: { data: ReportBlockData }) {
 
         <div className="report-offices-grid">
           <div className="report-office-card">
-            <div className="report-office-title">Design Studio</div>
-            <p>141A, Maharaja Engineers, Cherthala, Alappuzha — 688529</p>
+            <div className="report-office-title">Alappuzha Office</div>
+            <p>Design Studio, 141A, Maharaja Engineers, Cherthala, Alappuzha — 688529</p>
           </div>
           <div className="report-office-card">
             <div className="report-office-title">Thripunithura Office</div>
@@ -574,6 +582,16 @@ export function ClosingBlock({ data }: { data: ReportBlockData }) {
           <div className="report-office-card">
             <div className="report-office-title">Coimbatore Office</div>
             <p>Maharaja Engineers &amp; Contractors, 2nd Floor, Curtain Studio, TV Swamy Rd, R.S. Puram, Coimbatore, Tamil Nadu — 641002</p>
+          </div>
+        </div>
+
+        <div className="report-final-numbers">
+          <div className="report-final-number-row">
+            <span>Mob:</span> +91 7561000480, 9567100048
+          </div>
+          <div className="report-final-number-row">
+            <WhatsAppIcon />
+            <span>+91 7561000480, 9567100048</span>
           </div>
         </div>
 

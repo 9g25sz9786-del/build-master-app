@@ -8,7 +8,7 @@ import { CompanyProfile, ProjectMedia, ProjectIntroSection, ProjectLocation, Rep
 import PagedPreviewButton from "@/components/PagedPreviewButton";
 import DownloadPdfButton from "@/components/DownloadPdfButton";
 import ReportCharts from "@/components/ReportCharts";
-import { renderBlockBody } from "@/components/report/ReportBlocks";
+import { renderBlockBody, WhatsAppIcon } from "@/components/report/ReportBlocks";
 import { fetchReportData } from "@/lib/report/fetchReportData";
 
 export const dynamic = "force-dynamic";
@@ -644,8 +644,8 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
 
           <div className="report-offices-grid">
             <div className="report-office-card">
-              <div className="report-office-title">Design Studio</div>
-              <p>141A, Maharaja Engineers, Cherthala, Alappuzha — 688529</p>
+              <div className="report-office-title">Alappuzha Office</div>
+              <p>Design Studio, 141A, Maharaja Engineers, Cherthala, Alappuzha — 688529</p>
             </div>
             <div className="report-office-card">
               <div className="report-office-title">Thripunithura Office</div>
@@ -654,6 +654,16 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
             <div className="report-office-card">
               <div className="report-office-title">Coimbatore Office</div>
               <p>Maharaja Engineers &amp; Contractors, 2nd Floor, Curtain Studio, TV Swamy Rd, R.S. Puram, Coimbatore, Tamil Nadu — 641002</p>
+            </div>
+          </div>
+
+          <div className="report-final-numbers">
+            <div className="report-final-number-row">
+              <span>Mob:</span> +91 7561000480, 9567100048
+            </div>
+            <div className="report-final-number-row">
+              <WhatsAppIcon />
+              <span>+91 7561000480, 9567100048</span>
             </div>
           </div>
 

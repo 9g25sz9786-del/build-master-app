@@ -322,14 +322,28 @@ export default function ReportCanvasEditor({
                 style={{ zIndex: b.z_index }}
                 onDragStart={() => setSelectedId(b.id)}
                 onDragStop={(_e, d) => updateBlock(b.id, { x: d.x / MM_TO_PX, y: d.y / MM_TO_PX })}
-                onResizeStop={(_e, _dir, ref, _delta, pos) =>
-                  updateBlock(b.id, {
-                    width: ref.offsetWidth / MM_TO_PX,
-                    height: ref.offsetHeight / MM_TO_PX,
-                    x: pos.x / MM_TO_PX,
-                    y: pos.y / MM_TO_PX,
-                  })
-                }
+                onResizeStop={(_e, dir, ref, _delta, pos) => {
+                  const newWidth = ref.offsetWidth / MM_TO_PX;
+                  const newHeight = ref.offsetHeight / MM_TO_PX;
+                  const newX = pos.x / MM_TO_PX;
+                  const newY = pos.y / MM_TO_PX;
+                  const patch: Partial<EditableBlock> = { width: newWidth, height: newHeight, x: newX, y: newY };
+                  // Dragging the bottom edge already visually "hides from the bottom" (the box
+                  // just gets shorter, content is top-anchored so less of it shows). Dragging
+                  // the TOP edge alone wouldn't do the mirror-image thing on its own — content
+                  // is still top-anchored, so it'd show the *same* starting point, just less of
+                  // it, same as the bottom. To make the top handle actually reveal later content
+                  // (hide the beginning) the way it visually should, shifting the top edge down
+                  // by N also nudges cropTopMm by that same N.
+                  if (dir.toLowerCase().includes("top")) {
+                    const deltaTopMm = newY - b.y;
+                    if (deltaTopMm !== 0) {
+                      const nextCrop = Math.max(0, (b.content_ref.cropTopMm || 0) + deltaTopMm);
+                      patch.content_ref = { ...b.content_ref, cropTopMm: nextCrop };
+                    }
+                  }
+                  updateBlock(b.id, patch);
+                }}
                 onMouseDown={() => {
                   setSelectedId(b.id);
                   bringToFront(b.id);

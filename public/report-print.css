@@ -158,8 +158,12 @@ body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; color: var(--ink
 .report-author-bio { font-size:13.5px; line-height:1.85; color:#E8E4D8; white-space:pre-line; text-align:justify; }
 
 /* ── Closing page redesign: logo in a white band, 3 office addresses, bigger colophon logo + QR slot ── */
-.report-final-logo-band { background:#fff; display:inline-flex; align-items:center; justify-content:center; padding:16px 34px; border-radius:6px; }
-.report-final-logo { max-height:110px; max-width:320px; width:auto; height:auto; object-fit:contain; display:block; }
+.report-final-logo-band { background:#fff; width:calc(100% + 88px); margin:-60px -44px 0; display:flex; align-items:center; justify-content:center; padding:22px 44px; }
+.report-final-logo { max-height:120px; max-width:340px; width:auto; height:auto; object-fit:contain; display:block; }
+
+.report-final-numbers { margin-top:24px; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.report-final-number-row { display:flex; align-items:center; gap:7px; font-size:12.5px; color:#D8D4C8; font-family:'IBM Plex Mono',monospace; }
+.report-final-number-row span:first-child { color:#F2B632; font-family:'Poppins',sans-serif; font-weight:600; font-size:11.5px; }
 
 .report-offices-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; margin-top:30px; text-align:left; }
 .report-office-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:16px 18px; }
