@@ -19,7 +19,7 @@ export default function ReportCharts({
         <div style={{ width: "100%", height: 260 }}>
           <ResponsiveContainer>
             <PieChart>
-              <Pie data={costBreakdown} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>
+              <Pie data={costBreakdown} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={costBreakdown.length > 1 ? 2 : 0}>
                 {costBreakdown.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Tooltip formatter={(v: any) => fmtINR(v)} />
@@ -33,7 +33,7 @@ export default function ReportCharts({
         <div style={{ width: "100%", height: 260 }}>
           <ResponsiveContainer>
             <PieChart>
-              <Pie data={revenueBreakdown} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>
+              <Pie data={revenueBreakdown} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={revenueBreakdown.length > 1 ? 2 : 0}>
                 {revenueBreakdown.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Tooltip formatter={(v: any) => fmtINR(v)} />
