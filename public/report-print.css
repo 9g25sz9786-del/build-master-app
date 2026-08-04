@@ -32,7 +32,7 @@ body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; color: var(--ink
 .report-section { break-before: page; page-break-before: always; }
 .report-topic + .report-topic { break-before: page; page-break-before: always; }
 .report-charts-page { break-before: page; page-break-before: always; }
-.report-toc, .report-final-cta, .report-colophon, .report-author {
+.report-toc, .report-final-cta, .report-colophon {
   break-inside: avoid-page;
   page-break-inside: avoid;
 }
@@ -152,10 +152,10 @@ body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; color: var(--ink
 .report-score-legend { display:flex; gap:2px; margin-top:18px; border-radius:6px; overflow:hidden; }
 .report-score-legend span { flex:1; text-align:center; font-size:10px; padding:8px 4px; color:#fff; font-family:'IBM Plex Mono',monospace; }
 
-.report-author { position:relative; display:flex; align-items:center; overflow:hidden; }
+.report-author { position:relative; display:block; overflow:visible; }
 .report-author-bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05) brightness(0.5); }
 .report-author-overlay { position:absolute; inset:0; background:linear-gradient(100deg, rgba(14,14,14,0.96) 45%, rgba(14,14,14,0.5) 100%); }
-.report-author-content { position:relative; z-index:2; padding:60px 44px; color:#fff; width:100%; display:flex; align-items:center; justify-content:space-between; gap:44px; }
+.report-author-content { position:relative; z-index:2; padding:60px 44px; color:#fff; width:100%; display:flex; align-items:flex-start; justify-content:space-between; gap:44px; }
 .report-author-text { flex:1; min-width:0; }
 .report-author-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#C1272D; margin-bottom:16px; }
 .report-author-photo { width:240px; height:320px; border-radius:4px; object-fit:cover; flex-shrink:0; filter:grayscale(1) contrast(1.1) brightness(0.85); box-shadow:0 10px 30px rgba(0,0,0,0.45); }
@@ -163,7 +163,7 @@ body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; color: var(--ink
 .report-author-bio { font-size:13.5px; line-height:1.85; color:#E8E4D8; white-space:pre-line; text-align:justify; }
 
 /* ── Closing page redesign: logo in a white band, 3 office addresses, bigger colophon logo + QR slot ── */
-.report-final-logo-band { background:#fff; width:calc(100% + 88px); margin:-60px -44px 0; display:flex; align-items:center; justify-content:center; padding:22px 44px; }
+.report-final-logo-band { background:#fff; width:calc(100% + 88px); margin:-60px -44px 0; display:flex; align-items:flex-start; justify-content:center; padding:22px 44px; }
 .report-final-logo { max-height:120px; max-width:340px; width:auto; height:auto; object-fit:contain; display:block; }
 
 .report-final-numbers { margin-top:24px; display:flex; flex-direction:column; align-items:center; gap:6px; }
