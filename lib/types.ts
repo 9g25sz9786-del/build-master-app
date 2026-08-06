@@ -14,6 +14,7 @@ export interface CompanyProfile {
   portfolio_highlights: string[];
   logo_storage_path: string | null;
   author_name: string | null;
+  author_role: string | null;
   author_bio: string | null;
   author_photo_storage_path: string | null;
   author_background_photo_storage_path: string | null;
