@@ -84,7 +84,11 @@ export default async function CompanyProfilePage() {
             <div className="field-grid">
               <label className="field">
                 <span className="field-label">Author Name</span>
-                <input name="author_name" className="field-input" style={{ paddingLeft: 12 }} defaultValue={c?.author_name || ""} placeholder="e.g. Nandu Jithendran, Managing Director" />
+                <input name="author_name" className="field-input" style={{ paddingLeft: 12 }} defaultValue={c?.author_name || ""} placeholder="e.g. Nandu Jithendran" />
+              </label>
+              <label className="field">
+                <span className="field-label">Author Role</span>
+                <input name="author_role" className="field-input" style={{ paddingLeft: 12 }} defaultValue={c?.author_role || ""} placeholder="e.g. Chief Operating Officer, Maharaja Engineers & Contractors" />
               </label>
             </div>
             <label className="field">

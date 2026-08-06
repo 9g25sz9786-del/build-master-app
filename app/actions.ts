@@ -133,6 +133,7 @@ export async function saveCompanyProfile(formData: FormData) {
     website: String(formData.get("website") || "") || null,
     portfolio_highlights: highlights,
     author_name: String(formData.get("author_name") || "") || null,
+    author_role: String(formData.get("author_role") || "") || null,
     author_bio: String(formData.get("author_bio") || "") || null,
   };
 

@@ -618,6 +618,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
                 <img src={companyPublicUrl(c.author_photo_storage_path)} alt={c?.author_name || ""} className="report-author-photo" />
               )}
               {c?.author_name && <div className="report-author-name">{c.author_name}</div>}
+              {c?.author_role && <div className="report-author-role">{c.author_role}</div>}
               {c?.author_bio && <p className="report-author-bio">{c.author_bio}</p>}
             </div>
           </div>

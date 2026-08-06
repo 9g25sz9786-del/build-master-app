@@ -314,6 +314,7 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .report-author-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#C1272D; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
 .report-author-photo { width:200px; height:260px; object-fit:cover; border-radius:2px; float:right; margin:0 0 20px 24px; filter:grayscale(1) contrast(1.05); border:1px solid var(--r-line); }
 .report-author-name { font-family:'Poppins',sans-serif; font-weight:700; font-size:21px; color:var(--r-ink); margin-bottom:10px; }
+.report-author-role { font-size:12.5px; color:var(--r-gray); margin:-6px 0 16px; }
 .report-author-bio { font-size:13.5px; line-height:1.85; color:var(--r-ink); white-space:pre-line; text-align:justify; }
 @media print {
   @page {
@@ -374,10 +375,8 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
   .report-cover { min-height: 100vh; }
 
   .report-final-cta, .report-colophon {
-    margin: -18mm -15mm;
     break-before: page;
     page-break-before: always;
-    min-height: 100vh;
   }
   .report-author {
     break-before: page;
