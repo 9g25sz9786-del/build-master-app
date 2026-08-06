@@ -608,28 +608,17 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           </div>
         </section>
 
-        {/* About the Author — one clean page: background photo blend + portrait + full bio */}
+        {/* About the Author — simple white page, photo floats top-right, text flows around it */}
         {(c?.author_name || c?.author_bio || c?.author_photo_storage_path) && (
           <div className="report-author">
-            {(c?.author_background_photo_storage_path || c?.author_photo_storage_path) ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={companyPublicUrl(c.author_background_photo_storage_path || c.author_photo_storage_path!)}
-                alt=""
-                className="report-author-bg"
-              />
-            ) : null}
-            <div className="report-author-overlay" />
             <div className="report-author-content">
-              <div className="report-author-text">
-                <div className="report-author-eyebrow"><span className="report-accent-dot" /> About the Author</div>
-                {c?.author_name && <div className="report-author-name">{c.author_name}</div>}
-                {c?.author_bio && <p className="report-author-bio">{c.author_bio}</p>}
-              </div>
+              <div className="report-author-eyebrow"><span className="report-accent-dot" /> About the Author</div>
               {c?.author_photo_storage_path && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={companyPublicUrl(c.author_photo_storage_path)} alt={c?.author_name || ""} className="report-author-photo" />
               )}
+              {c?.author_name && <div className="report-author-name">{c.author_name}</div>}
+              {c?.author_bio && <p className="report-author-bio">{c.author_bio}</p>}
             </div>
           </div>
         )}
