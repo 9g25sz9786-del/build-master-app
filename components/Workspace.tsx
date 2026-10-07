@@ -325,7 +325,8 @@ function Dashboard({ state, m, go, projectId }: { state: ProjectState; m: Metric
           <button className="quicknav-btn" onClick={() => go("results")}><BarChart3 size={15} /> Results & Score</button>
           <button className="quicknav-btn" onClick={() => go("report")}><ScrollText size={15} /> AI Report</button>
           <button className="quicknav-btn" onClick={() => go("charts")}><BarChart3 size={15} /> Charts</button>
-          <a href={`/projects/${projectId}/full-report`} target="_blank" rel="noreferrer" className="quicknav-btn"><ScrollText size={15} /> Full Printable Report</a>
+          <a href={`/projects/${projectId}/full-report`} target="_blank" rel="noreferrer" className="quicknav-btn"><ScrollText size={15} /> Full Report · Maharaja</a>
+          <a href={`/projects/${projectId}/full-report?brand=eastay`} target="_blank" rel="noreferrer" className="quicknav-btn"><ScrollText size={15} /> Full Report · Eastay</a>
         </div>
       </div>
     </div>
@@ -646,9 +647,14 @@ function Report({ m, rec, state, projectId }: { m: Metrics; rec: ReturnType<type
   return (
     <div className="view">
       <StepHeader n={8} title="Investment Score & AI Recommendation" subtitle="Deterministic, weighted evaluation across 8 factors." />
-      <a href={`/projects/${projectId}/full-report`} target="_blank" rel="noreferrer" className="btn-primary" style={{ width: "fit-content" }}>
-        <ScrollText size={15} /> Open Full Printable Report (Company Profile + Feasibility + Renders + Conclusion)
-      </a>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <a href={`/projects/${projectId}/full-report`} target="_blank" rel="noreferrer" className="btn-primary" style={{ width: "fit-content" }}>
+          <ScrollText size={15} /> Full Printable Report · Maharaja branding
+        </a>
+        <a href={`/projects/${projectId}/full-report?brand=eastay`} target="_blank" rel="noreferrer" className="btn-primary" style={{ width: "fit-content" }}>
+          <ScrollText size={15} /> Full Printable Report · Eastay branding
+        </a>
+      </div>
       <div className="card"><ScoreGauge score={m.overallScore} label={m.scoreLabel} /></div>
       <div className="card">
         <div className="card-head">Verdict</div>
@@ -863,7 +869,8 @@ export default function Workspace({
           <Link href="/media" className="nav-btn"><ImageIcon size={16} strokeWidth={2} /> Project Media</Link>
           <Link href={`/media/${project.id}`} className="nav-btn" style={{ paddingLeft: 32, fontSize: 12 }}>This project's media →</Link>
           <Link href={`/intro/${project.id}`} className="nav-btn" style={{ paddingLeft: 32, fontSize: 12 }}>This project's intro →</Link>
-          <Link href={`/projects/${project.id}/full-report`} className="nav-btn" target="_blank"><ScrollText size={16} strokeWidth={2} /> Full Printable Report</Link>
+          <Link href={`/projects/${project.id}/full-report`} className="nav-btn" target="_blank"><ScrollText size={16} strokeWidth={2} /> Full Report · Maharaja</Link>
+          <Link href={`/projects/${project.id}/full-report?brand=eastay`} className="nav-btn" target="_blank"><ScrollText size={16} strokeWidth={2} /> Full Report · Eastay</Link>
         </nav>
         <div className="sidebar-footer">
           <div className="footer-score"><span>Score</span><span className="mono footer-score-val">{fmtNum(m.overallScore)}</span></div>
