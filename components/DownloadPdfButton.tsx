@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { FileDown, Loader2 } from "lucide-react";
 
-export default function DownloadPdfButton({ projectId }: { projectId: string }) {
+export default function DownloadPdfButton({ projectId, brand }: { projectId: string; brand?: string }) {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
 
   async function handleDownload() {
     setStatus("loading");
     try {
-      const res = await fetch(`/api/projects/${projectId}/report-pdf`);
+      const res = await fetch(`/api/projects/${projectId}/report-pdf${brand && brand !== "maharaja" ? `?brand=${encodeURIComponent(brand)}` : ""}`);
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         throw new Error(body?.error || `Server responded with ${res.status}`);

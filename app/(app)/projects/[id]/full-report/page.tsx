@@ -10,6 +10,7 @@ import DownloadPdfButton from "@/components/DownloadPdfButton";
 import ReportCharts from "@/components/ReportCharts";
 import { renderBlockBody, WhatsAppIcon } from "@/components/report/ReportBlocks";
 import { fetchReportData } from "@/lib/report/fetchReportData";
+import { BRANDS, getBrand, ReportBrand } from "@/lib/report/brands";
 
 export const dynamic = "force-dynamic";
 
@@ -39,12 +40,12 @@ function MetricStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ScoreGaugeStatic({ score }: { score: number }) {
+function ScoreGaugeStatic({ score, accent }: { score: number; accent: string }) {
   const pct = Math.min(10, Math.max(0, score)) / 10;
   const angle = 180 + pct * 180;
   const r = 70, cx = 90, cy = 90;
   const rad = (deg: number) => (deg * Math.PI) / 180;
-  const arcColor = score >= 7 ? "#2E8B6F" : score >= 5 ? "#C1272D" : "#C1272D";
+  const arcColor = score >= 7 ? "#2E8B6F" : accent;
   return (
     <svg viewBox="0 0 180 110" style={{ width: 200 }}>
       <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="#ECECEC" strokeWidth="12" strokeLinecap="round" />
@@ -81,7 +82,7 @@ function CoverPlaceholder() {
     </svg>
   );
 }
-function TopicPlaceholder() {
+function TopicPlaceholder({ accent }: { accent: string }) {
   return (
     <svg viewBox="0 0 800 360" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: 360, display: "block" }}>
       <rect width="800" height="360" fill="#EDEDED" />
@@ -94,7 +95,7 @@ function TopicPlaceholder() {
         <line x1="260" y1="90" x2="260" y2="290" />
         <line x1="320" y1="90" x2="320" y2="290" />
       </g>
-      <g stroke="#C1272D" strokeWidth="2.5" fill="none">
+      <g stroke={accent} strokeWidth="2.5" fill="none">
         <line x1="450" y1="290" x2="450" y2="80" />
         <line x1="450" y1="80" x2="500" y2="60" />
         <line x1="450" y1="100" x2="600" y2="100" />
@@ -103,9 +104,31 @@ function TopicPlaceholder() {
   );
 }
 
+function BrandSwitch({ projectId, brand }: { projectId: string; brand: ReportBrand }) {
+  return (
+    <div className="report-brand-switch" role="group" aria-label="Report branding">
+      {Object.values(BRANDS).map((b) => (
+        <Link
+          key={b.key}
+          href={`/projects/${projectId}/full-report${b.key === "maharaja" ? "" : `?brand=${b.key}`}`}
+          className={"report-brand-option" + (b.key === brand.key ? " active" : "")}
+        >
+          {b.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
 
-export default async function FullReportPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function FullReportPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ brand?: string | string[] }>;
+}) {
   const { id } = await params;
+  const brand = getBrand((await searchParams).brand);
   const supabase = await createClient();
   const {
     data: { user },
@@ -219,7 +242,9 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
   );
 
   const today = new Date().toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" });
-  const companyName = c?.company_name || "Maharaja Engineers & Contractors";
+  const companyName = brand.companyName || c?.company_name || "Maharaja Engineers & Contractors";
+  const coverLogo = brand.logo || (c?.logo_storage_path ? companyPublicUrl(c.logo_storage_path) : null);
+  const showProfileTagline = brand.useProfileTagline && !!(c?.tagline || c?.established_year);
 
   const hasAuthorContent = !!(c?.author_name || c?.author_bio || c?.author_photo_storage_path);
   const sectionList = [
@@ -243,12 +268,13 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
         <Link href={`/projects/${id}`} className="btn-ghost"><ArrowLeftCircle size={16} /> Back to Project</Link>
         <div style={{ display: "flex", gap: 10 }}>
           <Link href={`/projects/${id}/full-report/editor`} className="btn-ghost"><LayoutTemplate size={15} /> Edit Layout</Link>
+          <BrandSwitch projectId={id} brand={brand} />
           <PagedPreviewButton />
-          <DownloadPdfButton projectId={id} />
+          <DownloadPdfButton projectId={id} brand={brand.key} />
         </div>
       </div>
 
-      <div className="report-doc" id="report-content">
+      <div className={`report-doc brand-${brand.key}`} id="report-content" style={{ "--r-red": brand.accent } as CSSProperties}>
         {/* Cover */}
         <div className="report-cover">
           {coverImage ? (
@@ -259,15 +285,15 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           )}
           <div className="report-cover-overlay" />
           <div className="report-cover-logo-row">
-            {c?.logo_storage_path ? (
+            {coverLogo ? (
               <div className="report-cover-logo-band">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={companyPublicUrl(c.logo_storage_path)} alt={companyName} />
+                <img src={coverLogo} alt={companyName} />
               </div>
             ) : (
               <span className="report-cover-logo-text">{companyName}</span>
             )}
-            {(c?.tagline || c?.established_year) && (
+            {showProfileTagline && (
               <div className="report-cover-tagline-row">
                 {c?.tagline && <div className="report-cover-tagline">{c.tagline}</div>}
                 {c?.established_year && <div className="report-cover-since">SINCE {c.established_year}</div>}
@@ -329,7 +355,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={publicUrl(s.photos[0].storage_path)} alt="" />
                   ) : (
-                    <TopicPlaceholder />
+                    <TopicPlaceholder accent={brand.accent} />
                   )}
                 </div>
                 {s.photos && s.photos.length > 1 && (
@@ -494,7 +520,7 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
             <ReportCharts costBreakdown={m.costBreakdown} revenueBreakdown={m.revenueBreakdown} />
 
           <div className="card" style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 24 }}>
-            <ScoreGaugeStatic score={m.overallScore} />
+            <ScoreGaugeStatic score={m.overallScore} accent={brand.accent} />
             <div>
               <div className="card-head" style={{ marginBottom: 4 }}>{m.scoreLabel}</div>
               <p className="report-prose" style={{ fontSize: 13 }}>Risk Level: <b>{m.riskLevel}</b> · {m.bankable}</p>
@@ -518,9 +544,9 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
               ))}
             </div>
             <div className="report-score-legend">
-              <span style={{ background: m.overallScore < 3 ? "#C1272D" : "#D9D9D9", color: m.overallScore < 3 ? "#fff" : "#999" }}>1–2 Very Poor</span>
-              <span style={{ background: m.overallScore >= 3 && m.overallScore < 5 ? "#C1272D" : "#D9D9D9", color: m.overallScore >= 3 && m.overallScore < 5 ? "#fff" : "#999" }}>3–4 Poor</span>
-              <span style={{ background: m.overallScore >= 5 && m.overallScore < 7 ? "#C1272D" : "#D9D9D9", color: m.overallScore >= 5 && m.overallScore < 7 ? "#fff" : "#999" }}>5–6 Average</span>
+              <span style={{ background: m.overallScore < 3 ? brand.accent : "#D9D9D9", color: m.overallScore < 3 ? "#fff" : "#999" }}>1–2 Very Poor</span>
+              <span style={{ background: m.overallScore >= 3 && m.overallScore < 5 ? brand.accent : "#D9D9D9", color: m.overallScore >= 3 && m.overallScore < 5 ? "#fff" : "#999" }}>3–4 Poor</span>
+              <span style={{ background: m.overallScore >= 5 && m.overallScore < 7 ? brand.accent : "#D9D9D9", color: m.overallScore >= 5 && m.overallScore < 7 ? "#fff" : "#999" }}>5–6 Average</span>
               <span style={{ background: m.overallScore >= 7 && m.overallScore < 9 ? "#2E8B6F" : "#D9D9D9", color: m.overallScore >= 7 && m.overallScore < 9 ? "#fff" : "#999" }}>7–8 Good</span>
               <span style={{ background: m.overallScore >= 9 ? "#2E8B6F" : "#D9D9D9", color: m.overallScore >= 9 ? "#fff" : "#999" }}>9–10 Excellent</span>
             </div>
@@ -624,53 +650,101 @@ export default async function FullReportPage({ params }: { params: Promise<{ id:
           </div>
         )}
 
-        {/* Closing: company contact + colophon */}
-        <div className="report-final-cta">
-          {c?.logo_storage_path && (
-            <div className="report-final-logo-band">
+        {brand.team ? (
+          /* Brand team page — replaces the office-addresses page */
+          <div className="report-team">
+            <div className="report-team-eyebrow">
+              {brand.mark && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={brand.mark} alt="" className="report-team-mark" />
+              )}
+              <span>{brand.team.eyebrow}</span>
+            </div>
+            <h2 className="report-team-title">{brand.team.title}</h2>
+            <div className="report-team-grid">
+              {brand.team.members.map((p) => (
+                <div className="report-team-member" key={p.name}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.photo} alt={p.name} className="report-team-photo" />
+                  <div className="report-team-name">{p.name}</div>
+                  <div className="report-team-role">{p.role}</div>
+                  <p className="report-team-bio">{p.bio}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="report-final-cta">
+            {c?.logo_storage_path && (
+              <div className="report-final-logo-band">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={companyPublicUrl(c.logo_storage_path)} alt={companyName} className="report-final-logo" />
+              </div>
+            )}
+            <p style={{ marginTop: c?.logo_storage_path ? 26 : 0 }}>{c?.tagline || "Building trust, one project at a time."}</p>
+
+            <div className="report-offices-grid">
+              <div className="report-office-card">
+                <div className="report-office-title">Alappuzha Office</div>
+                <p>Design Studio, 141A, Maharaja Engineers, Cherthala, Alappuzha — 688529</p>
+              </div>
+              <div className="report-office-card">
+                <div className="report-office-title">Thripunithura Office</div>
+                <p>Maharaja Engineers &amp; Contractors, 555 H1, 3rd Floor, Malayil Majesty, Thripunithura — 682301</p>
+              </div>
+              <div className="report-office-card">
+                <div className="report-office-title">Coimbatore Office</div>
+                <p>Maharaja Engineers &amp; Contractors, 2nd Floor, Curtain Studio, TV Swamy Rd, R.S. Puram, Coimbatore, Tamil Nadu — 641002</p>
+              </div>
+            </div>
+
+            <div className="report-final-numbers">
+              <div className="report-final-number-row">
+                <span>Mob:</span> +91 7561000480, 9567100048
+              </div>
+              <div className="report-final-number-row">
+                <WhatsAppIcon />
+                <span>+91 7561000480, 9567100048</span>
+              </div>
+              {c?.email && <div className="report-final-number-row">{c.email}</div>}
+              {c?.website && <div className="report-final-number-row">{c.website}</div>}
+            </div>
+          </div>
+        )}
+
+        {brand.contacts ? (
+          /* Brand closing page — brand logo + contact details instead of the Build Master colophon */
+          <div className="report-final-cta report-brand-closing">
+            {brand.logo && (
+              <div className="report-final-logo-band">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={brand.logo} alt={companyName} className="report-final-logo" />
+              </div>
+            )}
+            <div className="report-final-numbers">
+              <div className="report-final-number-row">
+                <span>Mob:</span> {brand.contacts.phones.join(", ")}
+              </div>
+              <div className="report-final-number-row">
+                <WhatsAppIcon />
+                <span>{brand.contacts.whatsapp.join(", ")}</span>
+              </div>
+              {(brand.contacts.email || c?.email) && <div className="report-final-number-row">{brand.contacts.email || c?.email}</div>}
+              {brand.contacts.website && <div className="report-final-number-row">{brand.contacts.website}</div>}
+            </div>
+            <div className="report-colophon-sub" style={{ marginTop: 28 }}>Project Feasibility Report · Generated {today}</div>
+          </div>
+        ) : (
+          <div className="report-colophon">
+            <div className="report-colophon-logo-row">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={companyPublicUrl(c.logo_storage_path)} alt={companyName} className="report-final-logo" />
+              <img src="/logo.png" alt="Build Master" className="report-colophon-logo-big" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/qr-instagram.png" alt="Scan for Instagram — @buildmasterindia" className="report-qr-code" />
             </div>
-          )}
-          <p style={{ marginTop: c?.logo_storage_path ? 26 : 0 }}>{c?.tagline || "Building trust, one project at a time."}</p>
-
-          <div className="report-offices-grid">
-            <div className="report-office-card">
-              <div className="report-office-title">Alappuzha Office</div>
-              <p>Design Studio, 141A, Maharaja Engineers, Cherthala, Alappuzha — 688529</p>
-            </div>
-            <div className="report-office-card">
-              <div className="report-office-title">Thripunithura Office</div>
-              <p>Maharaja Engineers &amp; Contractors, 555 H1, 3rd Floor, Malayil Majesty, Thripunithura — 682301</p>
-            </div>
-            <div className="report-office-card">
-              <div className="report-office-title">Coimbatore Office</div>
-              <p>Maharaja Engineers &amp; Contractors, 2nd Floor, Curtain Studio, TV Swamy Rd, R.S. Puram, Coimbatore, Tamil Nadu — 641002</p>
-            </div>
+            <div className="report-colophon-sub">Project Feasibility Intelligence · Report generated {today}</div>
           </div>
-
-          <div className="report-final-numbers">
-            <div className="report-final-number-row">
-              <span>Mob:</span> +91 7561000480, 9567100048
-            </div>
-            <div className="report-final-number-row">
-              <WhatsAppIcon />
-              <span>+91 7561000480, 9567100048</span>
-            </div>
-            {c?.email && <div className="report-final-number-row">{c.email}</div>}
-            {c?.website && <div className="report-final-number-row">{c.website}</div>}
-          </div>
-        </div>
-
-        <div className="report-colophon">
-          <div className="report-colophon-logo-row">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Build Master" className="report-colophon-logo-big" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/qr-instagram.png" alt="Scan for Instagram — @buildmasterindia" className="report-qr-code" />
-          </div>
-          <div className="report-colophon-sub">Project Feasibility Intelligence · Report generated {today}</div>
-        </div>
+        )}
       </div>
     </div>
   );
