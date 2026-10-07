@@ -24,7 +24,8 @@ export default function PagedPreviewButton() {
       try {
         const source = document.getElementById("report-content");
         if (!source) throw new Error("Could not find report content to preview.");
-        const html = source.innerHTML;
+        // outerHTML so the brand class + accent colour on #report-content come along too.
+        const html = source.outerHTML;
 
         const { Previewer } = await import("pagedjs");
         const previewer = new Previewer();

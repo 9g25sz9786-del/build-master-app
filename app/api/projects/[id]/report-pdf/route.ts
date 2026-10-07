@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getBrand } from "@/lib/report/brands";
 
 // Puppeteer + a real headless Chromium binary can't run on the Edge runtime, and shouldn't be
 // bundled by webpack (see next.config.mjs -> serverComponentsExternalPackages).
@@ -31,7 +32,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   const origin = request.nextUrl.origin;
-  const targetUrl = `${origin}/projects/${id}/full-report`;
+  const brand = getBrand(request.nextUrl.searchParams.get("brand"));
+  const targetUrl = `${origin}/projects/${id}/full-report${brand.key === "maharaja" ? "" : `?brand=${brand.key}`}`;
   const incomingCookies = request.cookies.getAll();
 
   const [{ default: chromium }, puppeteer] = await Promise.all([
