@@ -634,3 +634,12 @@ html, body { padding: 0; margin: 0; background: var(--vellum); color: var(--ink)
 .report-plan-card img { object-fit:contain; background:#fff; filter:grayscale(1) contrast(1.45); }
 .report-plan-list .report-plan-card img { height:auto; max-height:225mm; }
 .report-plan-list .report-plan-card + .report-plan-card { break-before:page; page-break-before:always; }
+
+/* ---- Justified prose + brand fee section ---- */
+.report-justify { text-align: justify; }
+.report-advisory-services { display:flex; flex-direction:column; gap:14px; }
+.report-advisory-service { display:flex; gap:14px; align-items:flex-start; break-inside:avoid-page; page-break-inside:avoid; }
+.report-advisory-step { flex-shrink:0; font-size:11px; font-weight:600; color:#fff; background:var(--r-red, #C1272D); border-radius:4px; padding:3px 7px; margin-top:2px; }
+.report-advisory-service-title { font-family:'Poppins',sans-serif; font-weight:600; font-size:14px; color:var(--r-ink, #141414); }
+.report-advisory-service-text { font-size:13px; line-height:1.65; color:#3A3A3A; margin:3px 0 0; text-align:justify; }
+.report-advisory .list-good li::marker { color: var(--r-red, #2E8B6F); }
