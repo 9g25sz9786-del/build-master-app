@@ -579,9 +579,10 @@ export default async function FullReportPage({
             {plans.length > 0 && (
               <>
                 <h3 style={{ fontFamily: "Poppins,sans-serif", fontSize: 15, margin: "24px 0 4px" }}>Plans & Drawings</h3>
-                <div className="report-media-grid">
+                {/* Plans are shown full-width at their own proportions (never cropped), one per page. */}
+                <div className="report-plan-list">
                   {plans.map((r) => (
-                    <div className="report-media-card" key={r.id}>
+                    <div className="report-media-card report-plan-card" key={r.id}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={publicUrl(r.storage_path)} alt={r.title} />
                       <div className="report-media-title">{r.title}</div>
