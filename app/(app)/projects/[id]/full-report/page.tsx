@@ -253,6 +253,7 @@ export default async function FullReportPage({
     { key: "feasibility", label: "Project Feasibility Analysis" },
     ...(hasGalleryMedia ? [{ key: "media", label: "Renderings, Plans & Site Photos" }] : []),
     { key: "conclusion", label: "Conclusion & Recommendation" },
+    ...(brand.advisory ? [{ key: "advisory", label: brand.advisory.title }] : []),
     ...(hasAuthorContent ? [{ key: "author", label: "About the Author" }] : []),
   ];
   const sectionNum: Record<string, string> = {};
@@ -379,7 +380,7 @@ export default async function FullReportPage({
             <h2 className="report-section-title"><span className="report-section-num">{sectionNum.location}</span> Location</h2>
 
             {projectLocation?.description && (
-              <p className="report-prose" style={{ marginBottom: 20 }}>{projectLocation.description}</p>
+              <p className="report-prose report-justify" style={{ marginBottom: 20 }}>{projectLocation.description}</p>
             )}
 
             {locationPhotos.length > 0 && (
@@ -579,9 +580,10 @@ export default async function FullReportPage({
             {plans.length > 0 && (
               <>
                 <h3 style={{ fontFamily: "Poppins,sans-serif", fontSize: 15, margin: "24px 0 4px" }}>Plans & Drawings</h3>
-                <div className="report-media-grid">
+                {/* Plans are shown full-width at their own proportions (never cropped), one per page. */}
+                <div className="report-plan-list">
                   {plans.map((r) => (
-                    <div className="report-media-card" key={r.id}>
+                    <div className="report-media-card report-plan-card" key={r.id}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={publicUrl(r.storage_path)} alt={r.title} />
                       <div className="report-media-title">{r.title}</div>
@@ -633,6 +635,56 @@ export default async function FullReportPage({
             <ul className="list-plain">{rec.improvements.map((t, i) => <li key={i}>{t}</li>)}</ul>
           </div>
         </section>
+
+        {/* Brand fee section (Eastay) — straight after Conclusion & Recommendation */}
+        {brand.advisory && (
+          <section className="report-section report-advisory">
+            <h2 className="report-section-title"><span className="report-section-num">{sectionNum.advisory}</span> {brand.advisory.title}</h2>
+            <p className="report-prose report-justify" style={{ marginBottom: 18 }}>{brand.advisory.intro}</p>
+
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div className="metric-grid">
+                <div className="stat-tile">
+                  <div className="stat-label">Fee</div>
+                  <div className="stat-value mono">{brand.advisory.feePct[0]}–{brand.advisory.feePct[1]}%</div>
+                  <div className="stat-desc">Of total project investment, agreed per project.</div>
+                </div>
+                <div className="stat-tile">
+                  <div className="stat-label">Indicative for this project</div>
+                  <div className="stat-value mono">
+                    {fmtINR((m.totalInvestment * brand.advisory.feePct[0]) / 100)} – {fmtINR((m.totalInvestment * brand.advisory.feePct[1]) / 100)}
+                  </div>
+                  <div className="stat-desc">Based on a total investment of {fmtINR(m.totalInvestment)}.</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div className="card-head">What the fee covers: one-stop service</div>
+              <div className="report-advisory-services">
+                {brand.advisory.services.map((s, i) => (
+                  <div className="report-advisory-service" key={s.title}>
+                    <span className="report-advisory-step mono">{String(i + 1).padStart(2, "0")}</span>
+                    <div>
+                      <div className="report-advisory-service-title">{s.title}</div>
+                      <p className="report-advisory-service-text">{s.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div className="card-head">Why we charge it</div>
+              <p className="report-prose report-justify" style={{ fontSize: 13.5 }}>{brand.advisory.why}</p>
+            </div>
+
+            <div className="card">
+              <div className="card-head">How it helps the investor</div>
+              <ul className="list-good">{brand.advisory.benefits.map((t, i) => <li key={i}>{t}</li>)}</ul>
+            </div>
+          </section>
+        )}
 
         {/* About the Author — simple white page, photo floats top-right, text flows around it */}
         {(c?.author_name || c?.author_bio || c?.author_photo_storage_path) && (

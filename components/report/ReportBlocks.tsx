@@ -458,7 +458,7 @@ export function MediaItemBlock({ data, mediaId }: { data: ReportBlockData; media
   const r = all.find((x) => x.id === mediaId);
   if (!r) return <p className="report-prose">Photo not found — it may have been deleted.</p>;
   return (
-    <div className="report-media-card" style={{ height: "100%" }}>
+    <div className={"report-media-card" + (r.category === "plan" ? " report-plan-card" : "")} style={{ height: "100%" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={publicMediaUrl(r.storage_path)} alt={r.title} style={{ height: "calc(100% - 40px)" }} />
       <div className="report-media-title">{r.title}</div>
